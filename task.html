@@ -431,19 +431,13 @@
 
                 const rawTaskText = (profData && profData.assigned_task) ? profData.assigned_task : 'Complete your assigned project task.';
 
-                taskItemsList = rawTaskText
-                    .split(/\n|;/)
-                    .map(t => t.trim())
-                    .filter(t => t.length > 0);
-
-                if (taskItemsList.length === 0) {
-                    taskItemsList = [rawTaskText];
-                }
+                // Smart Task Item Parser
+                taskItemsList = parseTaskItems(rawTaskText);
 
                 container.innerHTML = taskItemsList.map((itemText, idx) => `
                     <label class="check-item">
                         <input type="checkbox" class="task-checkbox" value="${escapeHtml(itemText)}" id="chk_${idx}">
-                        <span class="check-text">${escapeHtml(itemText)}</span>
+                        <span class="check-text" style="white-space: pre-line;">${escapeHtml(itemText)}</span>
                     </label>
                 `).join('');
 
@@ -574,6 +568,31 @@
 
             // Automatically submit the unsubmitted reset state to Supabase so Admin reflects it live!
             await submitTask();
+        }
+
+        // Smart Task Item Parser
+        function parseTaskItems(rawText) {
+            if (!rawText || !rawText.trim()) return ['Complete your assigned project task.'];
+            const text = rawText.trim();
+
+            // 1. If text contains explicit bullet points or numbered lists (1., 2., Task 1:, •, -, *)
+            if (/(^|\n)\s*(\d+[\.\)]|Task\s*\d+:|[•\-\*])\s+/i.test(text)) {
+                return text
+                    .split(/(?:^|\n)\s*(?=\d+[\.\)]|Task\s*\d+:|[•\-\*])/i)
+                    .map(t => t.replace(/^\s*(\d+[\.\)]|Task\s*\d+:|[•\-\*])\s*/i, '').trim())
+                    .filter(t => t.length > 0);
+            }
+
+            // 2. If text contains explicit double line breaks (\n\n) or vertical bars (|)
+            if (text.includes('\n\n') || text.includes('|')) {
+                return text
+                    .split(/\n\n+|\|/)
+                    .map(t => t.trim())
+                    .filter(t => t.length > 0);
+            }
+
+            // 3. Otherwise treat the entire text (even with single line breaks) as ONE single task box!
+            return [text];
         }
 
         function formatDate(date) {
