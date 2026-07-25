@@ -402,8 +402,8 @@
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        // Authenticated intern check
-        const sessionRaw = sessionStorage.getItem('intern_session');
+        // Authenticated intern check (localStorage for persistent login)
+        const sessionRaw = localStorage.getItem('intern_session') || sessionStorage.getItem('intern_session');
         if (!sessionRaw) {
             window.location.href = 'index.html';
         }
@@ -496,7 +496,7 @@
             }
 
             // Lock inputs & show status
-            toastText.textContent = `Task Response Submitted Live to Admin! (${formatDate(new Date(sub.created_at))})`;
+            toastText.textContent = `Task Response Live in Admin (${formatDate(new Date(sub.created_at))})`;
             toast.style.display = 'flex';
             btnUnsubmit.style.display = 'inline-block';
             btnSubmit.querySelector('span').textContent = 'Update Submission';
@@ -506,37 +506,51 @@
             const responseText = document.getElementById('taskResponseInput').value.trim();
             const checkedBoxes = Array.from(document.querySelectorAll('.task-checkbox:checked')).map(cb => cb.value);
 
-            if (checkedBoxes.length === 0 && !responseText) {
-                alert('Please tick at least one completed task item or provide your project URL / notes.');
-                return;
-            }
-
             const btnSubmit = document.getElementById('btnSubmitTask');
             btnSubmit.disabled = true;
             btnSubmit.querySelector('span').textContent = 'Submitting...';
 
-            const completedSummary = checkedBoxes.length > 0
-                ? `Completed Items (${checkedBoxes.length}/${taskItemsList.length}):\n• ` + checkedBoxes.join('\n• ') + (responseText ? `\n\nNotes / URL:\n${responseText}` : '')
-                : responseText;
+            let completedSummary = '';
+            if (checkedBoxes.length > 0) {
+                completedSummary = `Completed Items (${checkedBoxes.length}/${taskItemsList.length}):\n• ` + checkedBoxes.join('\n• ') + (responseText ? `\n\nNotes / URL:\n${responseText}` : '');
+            } else if (responseText) {
+                completedSummary = responseText;
+            } else {
+                completedSummary = `[Unsubmitted / Cleared by Intern — 0/${taskItemsList.length} Tasks Completed]`;
+            }
 
             const payload = {
                 intern_email: currentIntern.email,
                 intern_name: currentIntern.assigned_name,
-                task_title: `Task Checklist (${checkedBoxes.length}/${taskItemsList.length} Checked)`,
+                task_title: checkedBoxes.length > 0 ? `Task Checklist (${checkedBoxes.length}/${taskItemsList.length} Checked)` : `Task Unsubmitted / Reset`,
                 task_response: completedSummary
             };
 
             try {
-                const { data, error } = await supabaseClient
+                // Check if existing record exists to prevent duplicates
+                const { data: existingRows } = await supabaseClient
                     .from('task_submissions')
-                    .insert([payload]);
+                    .select('id')
+                    .eq('intern_email', currentIntern.email)
+                    .limit(1);
 
-                if (error) throw error;
+                if (existingRows && existingRows.length > 0) {
+                    const { error } = await supabaseClient
+                        .from('task_submissions')
+                        .update(payload)
+                        .eq('id', existingRows[0].id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient
+                        .from('task_submissions')
+                        .insert([payload]);
+                    if (error) throw error;
+                }
 
-                // Show Toast Notification without hiding page!
+                // Show Toast Notification
                 const toast = document.getElementById('statusToast');
                 const toastText = document.getElementById('statusToastText');
-                toastText.textContent = '✓ Task Response Submitted & Recorded Live!';
+                toastText.textContent = checkedBoxes.length > 0 ? '✓ Task Response Submitted & Updated Live!' : '✓ Submission Reset & Updated Live!';
                 toast.style.display = 'flex';
 
                 document.getElementById('btnUnsubmitTask').style.display = 'inline-block';
@@ -551,17 +565,15 @@
             }
         }
 
-        function unsubmitTask() {
-            if (!confirm('Unsubmit & unlock your task inputs to make changes?')) return;
+        async function unsubmitTask() {
+            if (!confirm('Unsubmit & untick your tasks to update your submission?')) return;
 
-            const toast = document.getElementById('statusToast');
-            const btnSubmit = document.getElementById('btnSubmitTask');
-            const btnUnsubmit = document.getElementById('btnUnsubmitTask');
+            // Untick all checkboxes & clear input
+            Array.from(document.querySelectorAll('.task-checkbox')).forEach(cb => cb.checked = false);
+            document.getElementById('taskResponseInput').value = '';
 
-            toast.style.display = 'none';
-            btnUnsubmit.style.display = 'none';
-            btnSubmit.querySelector('span').textContent = 'Resubmit Task Response';
-            alert('Your task inputs are now unlocked. Make your changes and click "Resubmit Task Response".');
+            // Automatically submit the unsubmitted reset state to Supabase so Admin reflects it live!
+            await submitTask();
         }
 
         function formatDate(date) {
