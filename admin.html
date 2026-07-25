@@ -765,8 +765,8 @@
                             <tr>
                                 <th>Intern</th>
                                 <th>Email</th>
-                                <th>Task Title</th>
-                                <th>Checked Items & Response Notes</th>
+                                <th>Checklist Status</th>
+                                <th>Project URL / Demo Notes</th>
                                 <th>Submitted At</th>
                             </tr>
                         </thead>
@@ -1119,7 +1119,8 @@
             const filtered = cacheTasks.filter(i => {
                 return (i.intern_name || '').toLowerCase().includes(query) ||
                        (i.intern_email || '').toLowerCase().includes(query) ||
-                       (i.task_response || '').toLowerCase().includes(query);
+                       (i.task_response || '').toLowerCase().includes(query) ||
+                       (i.project_url || '').toLowerCase().includes(query);
             });
 
             if (filtered.length === 0) {
@@ -1127,17 +1128,27 @@
                 return;
             }
 
-            tbody.innerHTML = filtered.map(item => `
-                <tr>
-                    <td><strong>${escapeHtml(item.intern_name)}</strong></td>
-                    <td>${escapeHtml(item.intern_email)}</td>
-                    <td style="font-size:12px; font-weight:600;">${escapeHtml(item.task_title)}</td>
-                    <td>
-                        <div class="task-response-box">${escapeHtml(item.task_response)}</div>
-                    </td>
-                    <td style="font-size:12px; color:var(--text-secondary);">${formatDate(new Date(item.created_at))}</td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = filtered.map(item => {
+                const urlText = item.project_url || '';
+                const isLink = /^https?:\/\//i.test(urlText.trim());
+
+                const urlDisplayHtml = isLink 
+                    ? `<a href="${escapeHtml(urlText.trim())}" target="_blank" class="btn-sm-edit" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px;">Open Project ↗</a><div style="font-size:11px; color:var(--text-muted); margin-top:4px; word-break:break-all;">${escapeHtml(urlText)}</div>`
+                    : `<div class="task-response-box">${escapeHtml(urlText || '—')}</div>`;
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(item.intern_name)}</strong></td>
+                        <td>${escapeHtml(item.intern_email)}</td>
+                        <td>
+                            <div style="font-size:11px; font-weight:700; color:var(--text-secondary); margin-bottom:4px;">${escapeHtml(item.task_title)}</div>
+                            <div class="task-response-box">${escapeHtml(item.task_response)}</div>
+                        </td>
+                        <td>${urlDisplayHtml}</td>
+                        <td style="font-size:12px; color:var(--text-secondary);">${formatDate(new Date(item.created_at))}</td>
+                    </tr>
+                `;
+            }).join('');
         }
 
         function formatDate(date) {
