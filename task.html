@@ -471,7 +471,6 @@
             const btnSubmit = document.getElementById('btnSubmitTask');
             const txtInput = document.getElementById('taskResponseInput');
 
-            // Parse response notes vs checklist
             const resp = sub.task_response || '';
             
             // Check matching checkboxes
@@ -481,12 +480,16 @@
                 }
             });
 
-            // Extract notes
-            const notesMatch = resp.match(/Notes \/ URL:\n([\s\S]*)/);
-            if (notesMatch && notesMatch[1]) {
-                txtInput.value = notesMatch[1].trim();
-            } else if (!resp.includes('Completed Items')) {
-                txtInput.value = resp;
+            // Set project URL / progress notes from dedicated project_url field or legacy response
+            if (sub.project_url) {
+                txtInput.value = sub.project_url;
+            } else {
+                const notesMatch = resp.match(/Notes \/ URL:\n([\s\S]*)/);
+                if (notesMatch && notesMatch[1]) {
+                    txtInput.value = notesMatch[1].trim();
+                } else if (!resp.includes('Completed Items')) {
+                    txtInput.value = resp;
+                }
             }
 
             // Lock inputs & show status
@@ -504,20 +507,12 @@
             btnSubmit.disabled = true;
             btnSubmit.querySelector('span').textContent = 'Submitting...';
 
-            let completedSummary = '';
-            if (checkedBoxes.length > 0) {
-                completedSummary = `Completed Items (${checkedBoxes.length}/${taskItemsList.length}):\n• ` + checkedBoxes.join('\n• ') + (responseText ? `\n\nNotes / URL:\n${responseText}` : '');
-            } else if (responseText) {
-                completedSummary = responseText;
-            } else {
-                completedSummary = `[Unsubmitted / Cleared by Intern — 0/${taskItemsList.length} Tasks Completed]`;
-            }
-
             const payload = {
                 intern_email: currentIntern.email,
                 intern_name: currentIntern.assigned_name,
-                task_title: checkedBoxes.length > 0 ? `Task Checklist (${checkedBoxes.length}/${taskItemsList.length} Checked)` : `Task Unsubmitted / Reset`,
-                task_response: completedSummary
+                task_title: checkedBoxes.length > 0 ? `Task Checklist (${checkedBoxes.length}/${taskItemsList.length} Checked)` : `Task Reset`,
+                task_response: checkedBoxes.length > 0 ? `Completed Items (${checkedBoxes.length}/${taskItemsList.length}):\n• ` + checkedBoxes.join('\n• ') : 'No items checked',
+                project_url: responseText || null
             };
 
             try {
