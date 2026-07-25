@@ -538,8 +538,8 @@
             }
         }
 
-        // Check active session
-        const sessionData = sessionStorage.getItem('intern_session');
+        // Check active session (localStorage for persistent login)
+        const sessionData = localStorage.getItem('intern_session') || sessionStorage.getItem('intern_session');
         if (sessionData) {
             showHub(JSON.parse(sessionData));
         }
@@ -575,7 +575,8 @@
                     return;
                 }
 
-                // Successful login
+                // Successful login - persist in localStorage
+                localStorage.setItem('intern_session', JSON.stringify(data));
                 sessionStorage.setItem('intern_session', JSON.stringify(data));
                 errorEl.style.display = 'none';
                 showHub(data);
@@ -595,6 +596,7 @@
         }
 
         function logout() {
+            localStorage.removeItem('intern_session');
             sessionStorage.removeItem('intern_session');
             document.getElementById('hubView').style.display = 'none';
             document.getElementById('loginView').style.display = 'block';
