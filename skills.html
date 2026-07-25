@@ -456,10 +456,10 @@
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        // Authenticated intern check
-        const sessionRaw = sessionStorage.getItem('intern_session');
+        // Authenticated intern check (localStorage for persistent login)
+        const sessionRaw = localStorage.getItem('intern_session') || sessionStorage.getItem('intern_session');
         if (!sessionRaw) {
-            window.location.href = 'main.html';
+            window.location.href = 'index.html';
         }
         const currentIntern = JSON.parse(sessionRaw);
         document.getElementById('badgeInternName').textContent = `${currentIntern.assigned_name} (${currentIntern.email})`;
@@ -512,11 +512,25 @@
             };
 
             try {
-                const { data, error } = await supabaseClient
+                // Check if existing record exists to prevent duplicates
+                const { data: existingRows } = await supabaseClient
                     .from('skills_submissions')
-                    .insert([payload]);
+                    .select('id')
+                    .eq('intern_email', currentIntern.email)
+                    .limit(1);
 
-                if (error) throw error;
+                if (existingRows && existingRows.length > 0) {
+                    const { error } = await supabaseClient
+                        .from('skills_submissions')
+                        .update(payload)
+                        .eq('id', existingRows[0].id);
+                    if (error) throw error;
+                } else {
+                    const { error } = await supabaseClient
+                        .from('skills_submissions')
+                        .insert([payload]);
+                    if (error) throw error;
+                }
 
                 document.getElementById('formCard').style.display = 'none';
                 document.getElementById('successInternName').textContent = currentIntern.assigned_name;
