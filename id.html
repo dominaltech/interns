@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Digital ID Card — Dominal Technology</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -182,6 +183,32 @@
             font-size: 13px;
         }
 
+        .crop-options-group {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            background-color: var(--accent-light);
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            border-radius: var(--radius-md);
+            margin-top: 8px;
+        }
+
+        .crop-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+        }
+
+        .crop-row select {
+            padding: 4px 8px;
+            font-size: 12px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-color);
+            outline: none;
+        }
+
         .privacy-notice {
             font-size: 11px;
             color: var(--text-muted);
@@ -210,7 +237,7 @@
         /* Pure White Digital ID Card Display */
         .id-card-display {
             width: 360px;
-            min-height: 540px;
+            min-height: 440px;
             background: #ffffff;
             border: 2px solid var(--text-primary);
             border-radius: 16px;
@@ -277,24 +304,26 @@
             text-transform: uppercase;
         }
 
-        /* Photo Frame */
+        /* Photo Frame (Hidden by Default when photo toggle is OFF) */
         .id-photo-frame {
+            display: none;
             width: 120px;
             height: 140px;
             border: 2px solid var(--text-primary);
             border-radius: 12px;
             overflow: hidden;
             background-color: #ffffff;
-            display: flex;
             align-items: center;
             justify-content: center;
             margin: 16px 0 12px 0;
+            position: relative;
         }
 
         .id-photo-frame img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: var(--transition);
         }
 
         .id-avatar-fallback {
@@ -309,6 +338,7 @@
         .id-details {
             text-align: center;
             width: 100%;
+            margin-top: 14px;
         }
 
         .id-intern-name {
@@ -456,6 +486,18 @@
             <div class="file-upload-box" id="fileUploadBox">
                 <label class="file-upload-label">Upload Your Photo (JPG / PNG):</label>
                 <input type="file" id="photoFileInput" accept="image/*" onchange="handlePhotoUpload(event)">
+                
+                <!-- Crop & Fit Options -->
+                <div class="crop-options-group" id="cropOptionsGroup">
+                    <div class="crop-row">
+                        <strong>Photo Crop Mode:</strong>
+                        <select id="cropFitMode" onchange="updateCropFitStyle()">
+                            <option value="cover">Crop & Fill Frame (Cover)</option>
+                            <option value="contain">Fit Full Image (Contain)</option>
+                        </select>
+                    </div>
+                </div>
+
                 <div class="privacy-notice">
                     <svg viewBox="0 0 24 24">
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
@@ -489,7 +531,7 @@
                     <div class="id-badge-label">INTERN</div>
                 </div>
 
-                <!-- Photo Frame -->
+                <!-- Photo Frame (Hidden by default when toggle is OFF) -->
                 <div class="id-photo-frame" id="photoFrame">
                     <svg class="id-avatar-fallback" id="avatarFallback" viewBox="0 0 24 24">
                         <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
@@ -573,10 +615,10 @@
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         }
 
-        // Check authentication
-        const sessionRaw = sessionStorage.getItem('intern_session');
+        // Authenticated intern check (localStorage for persistent login)
+        const sessionRaw = localStorage.getItem('intern_session') || sessionStorage.getItem('intern_session');
         if (!sessionRaw) {
-            window.location.href = 'main.html';
+            window.location.href = 'index.html';
         }
         const currentIntern = JSON.parse(sessionRaw);
 
@@ -605,20 +647,27 @@
 
         function togglePhotoOption() {
             const isChecked = document.getElementById('photoToggle').checked;
+            const photoFrame = document.getElementById('photoFrame');
             const uploadBox = document.getElementById('fileUploadBox');
             const fallback = document.getElementById('avatarFallback');
             const photoImg = document.getElementById('internPhotoImg');
+            const cropGroup = document.getElementById('cropOptionsGroup');
 
             if (isChecked) {
+                photoFrame.style.display = 'flex';
                 uploadBox.style.display = 'flex';
                 if (userPhotoDataUrl) {
                     fallback.style.display = 'none';
                     photoImg.style.display = 'block';
+                    cropGroup.style.display = 'flex';
+                } else {
+                    fallback.style.display = 'block';
+                    photoImg.style.display = 'none';
                 }
             } else {
+                photoFrame.style.display = 'none';
                 uploadBox.style.display = 'none';
-                photoImg.style.display = 'none';
-                fallback.style.display = 'block';
+                cropGroup.style.display = 'none';
             }
         }
 
@@ -631,12 +680,21 @@
                 userPhotoDataUrl = e.target.result;
                 const photoImg = document.getElementById('internPhotoImg');
                 const fallback = document.getElementById('avatarFallback');
+                const cropGroup = document.getElementById('cropOptionsGroup');
                 
                 photoImg.src = userPhotoDataUrl;
                 photoImg.style.display = 'block';
                 fallback.style.display = 'none';
+                cropGroup.style.display = 'flex';
+                updateCropFitStyle();
             };
             reader.readAsDataURL(file);
+        }
+
+        function updateCropFitStyle() {
+            const mode = document.getElementById('cropFitMode').value;
+            const photoImg = document.getElementById('internPhotoImg');
+            photoImg.style.objectFit = mode;
         }
 
         // Render Pure White Crisp ID Card to Canvas
@@ -645,6 +703,7 @@
             const ctx = canvas.getContext('2d');
             const W = 720;
             const H = 1080;
+            const showPhoto = document.getElementById('photoToggle').checked;
 
             // 1. Pure Crisp White background
             ctx.fillStyle = '#ffffff';
@@ -690,48 +749,72 @@
             ctx.fillText('INTERN', W - 110, 83);
             ctx.textAlign = 'left';
 
-            // 4. Photo Frame
-            const photoX = W / 2 - 120;
-            const photoY = 190;
-            const photoW = 240;
-            const photoH = 280;
+            let nameY = 530;
+            let roleY = 575;
+            let boxY = 620;
 
-            ctx.strokeStyle = '#09090b';
-            ctx.lineWidth = 4;
-            ctx.strokeRect(photoX, photoY, photoW, photoH);
+            // 4. Draw Photo Frame ONLY if photo toggle is ON
+            if (showPhoto) {
+                const photoX = W / 2 - 120;
+                const photoY = 190;
+                const photoW = 240;
+                const photoH = 280;
 
-            if (userPhotoDataUrl && document.getElementById('photoToggle').checked) {
-                try {
-                    const uPhoto = new Image();
-                    uPhoto.src = userPhotoDataUrl;
-                    await new Promise((res) => { uPhoto.onload = res; });
-                    ctx.drawImage(uPhoto, photoX, photoY, photoW, photoH);
-                } catch (e) {}
+                ctx.strokeStyle = '#09090b';
+                ctx.lineWidth = 4;
+                ctx.strokeRect(photoX, photoY, photoW, photoH);
+
+                if (userPhotoDataUrl) {
+                    try {
+                        const uPhoto = new Image();
+                        uPhoto.src = userPhotoDataUrl;
+                        await new Promise((res) => { uPhoto.onload = res; });
+
+                        const fitMode = document.getElementById('cropFitMode').value;
+                        if (fitMode === 'contain') {
+                            ctx.fillStyle = '#ffffff';
+                            ctx.fillRect(photoX, photoY, photoW, photoH);
+
+                            const hRatio = photoW / uPhoto.width;
+                            const vRatio = photoH / uPhoto.height;
+                            const ratio  = Math.min(hRatio, vRatio);
+                            const centerShift_x = photoX + (photoW - uPhoto.width * ratio) / 2;
+                            const centerShift_y = photoY + (photoH - uPhoto.height * ratio) / 2;
+                            ctx.drawImage(uPhoto, 0, 0, uPhoto.width, uPhoto.height, centerShift_x, centerShift_y, uPhoto.width * ratio, uPhoto.height * ratio);
+                        } else {
+                            ctx.drawImage(uPhoto, photoX, photoY, photoW, photoH);
+                        }
+                    } catch (e) {}
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(photoX, photoY, photoW, photoH);
+                    ctx.fillStyle = '#a1a1aa';
+                    ctx.font = 'bold 26px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('[ NO PHOTO ]', W / 2, photoY + photoH / 2 + 10);
+                    ctx.textAlign = 'left';
+                }
             } else {
-                ctx.fillStyle = '#ffffff';
-                ctx.fillRect(photoX, photoY, photoW, photoH);
-                ctx.fillStyle = '#a1a1aa';
-                ctx.font = 'bold 26px Inter, sans-serif';
-                ctx.textAlign = 'center';
-                ctx.fillText('[ NO PHOTO ]', W / 2, photoY + photoH / 2 + 10);
-                ctx.textAlign = 'left';
+                // When photo toggle is OFF, shift layout up for clean presentation
+                nameY = 280;
+                roleY = 325;
+                boxY = 400;
             }
 
             // 5. Intern Name & Role
             ctx.fillStyle = '#09090b';
-            ctx.font = 'bold 42px Inter, sans-serif';
+            ctx.font = 'bold 44px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(currentIntern.assigned_name, W / 2, 530);
+            ctx.fillText(currentIntern.assigned_name, W / 2, nameY);
 
             ctx.fillStyle = '#71717a';
             ctx.font = '600 26px Inter, sans-serif';
-            ctx.fillText('Software Development Intern', W / 2, 575);
+            ctx.fillText('Software Development Intern', W / 2, roleY);
 
-            // 6. Clean White Metadata Box (Pure White background, crisp border)
+            // 6. Clean White Metadata Box
             const boxX = 40;
-            const boxY = 620;
             const boxW = W - 80;
-            const boxH = 300;
+            const boxH = 320;
 
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
@@ -743,57 +826,57 @@
 
             ctx.textAlign = 'left';
 
-            // Row 1: Email Account (Full Width Row)
+            // Row 1: Email Account
             ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('EMAIL ACCOUNT', boxX + 24, boxY + 45);
+            ctx.fillText('EMAIL ACCOUNT', boxX + 24, boxY + 48);
 
             ctx.fillStyle = '#09090b';
             ctx.font = 'bold 24px Inter, sans-serif';
-            ctx.fillText(currentIntern.email, boxX + 24, boxY + 80);
+            ctx.fillText(currentIntern.email, boxX + 24, boxY + 88);
 
             // Dashed Divider Line inside Meta Box
             ctx.strokeStyle = '#e4e4e7';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.setLineDash([6, 6]);
-            ctx.moveTo(boxX + 24, boxY + 115);
-            ctx.lineTo(boxX + boxW - 24, boxY + 115);
+            ctx.moveTo(boxX + 24, boxY + 125);
+            ctx.lineTo(boxX + boxW - 24, boxY + 125);
             ctx.stroke();
             ctx.setLineDash([]); // reset
 
             // Row 2: Issued By & Official Site
             ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('ISSUED BY', boxX + 24, boxY + 160);
+            ctx.fillText('ISSUED BY', boxX + 24, boxY + 175);
 
             ctx.fillStyle = '#09090b';
             ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText('Dominal Technology', boxX + 24, boxY + 195);
+            ctx.fillText('Dominal Technology', boxX + 24, boxY + 210);
 
             ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('OFFICIAL SITE', boxX + 360, boxY + 160);
+            ctx.fillText('OFFICIAL SITE', boxX + 360, boxY + 175);
 
             ctx.fillStyle = '#09090b';
             ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText('dominal.in', boxX + 360, boxY + 195);
+            ctx.fillText('dominal.in', boxX + 360, boxY + 210);
 
             // Row 3: Status
             ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('STATUS', boxX + 24, boxY + 245);
+            ctx.fillText('STATUS', boxX + 24, boxY + 262);
 
             ctx.fillStyle = '#16a34a';
             ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText('VERIFIED INTERN', boxX + 24, boxY + 275);
+            ctx.fillText('VERIFIED INTERN', boxX + 24, boxY + 292);
 
             // 7. Footer
             ctx.strokeStyle = '#e4e4e7';
             ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.moveTo(40, 965);
-            ctx.lineTo(W - 40, 965);
+            ctx.moveTo(40, 970);
+            ctx.lineTo(W - 40, 970);
             ctx.stroke();
 
             ctx.fillStyle = '#09090b';
