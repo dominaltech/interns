@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Task Portal — Dominal Technology</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -83,6 +83,34 @@
             stroke-width: 2.5;
         }
 
+        .btn-refresh-task {
+            background-color: var(--accent-light);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 6px 12px;
+            border-radius: var(--radius-md);
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-refresh-task:hover {
+            border-color: var(--border-hover);
+            background-color: #ffffff;
+        }
+
+        .btn-refresh-task.spinning svg {
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         /* Header */
         .brand-header {
             margin-bottom: 28px;
@@ -123,7 +151,7 @@
             border: 1px solid var(--border-color);
             padding: 10px 14px;
             border-radius: var(--radius-md);
-            margin-bottom: 24px;
+            margin-bottom: 20px;
             font-size: 13px;
             display: flex;
             align-items: center;
@@ -206,8 +234,14 @@
             box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.08);
         }
 
+        .action-btn-row {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
         .btn-submit {
-            width: 100%;
+            flex: 1;
             background-color: var(--text-primary);
             color: #ffffff;
             border: none;
@@ -220,7 +254,6 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
-            margin-top: 20px;
             transition: var(--transition);
         }
 
@@ -228,66 +261,49 @@
             opacity: 0.9;
         }
 
-        /* Success Card */
-        .success-card {
-            display: none;
-            text-align: center;
-            padding: 40px 24px;
-        }
-
-        .success-icon-wrapper {
-            width: 64px;
-            height: 64px;
-            background-color: var(--success-bg);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px auto;
-            border: 1px solid rgba(22, 163, 74, 0.2);
-        }
-
-        .success-icon-wrapper svg {
-            width: 32px;
-            height: 32px;
-            stroke: var(--success);
-            stroke-width: 2.5;
-            fill: none;
-        }
-
-        .success-title {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 8px;
-        }
-
-        .success-msg {
-            font-size: 14px;
-            color: var(--text-secondary);
-            margin-bottom: 24px;
-        }
-
-        .btn-secondary {
-            background-color: transparent;
+        .btn-unsubmit {
+            background-color: #ffffff;
             border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 10px 20px;
+            color: var(--text-secondary);
             border-radius: var(--radius-md);
+            padding: 14px 20px;
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
             transition: var(--transition);
+            white-space: nowrap;
         }
 
-        .btn-secondary:hover {
+        .btn-unsubmit:hover {
+            color: var(--text-primary);
             border-color: var(--text-primary);
             background-color: var(--accent-light);
         }
+
+        /* Inline Toast Banner */
+        .toast-banner {
+            display: none;
+            background-color: var(--success-bg);
+            border: 1px solid rgba(22, 163, 74, 0.3);
+            color: var(--success);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .toast-banner svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.5;
+        }
     </style>
 </head>
-
 <body>
 
     <div class="container">
@@ -300,6 +316,14 @@
                 </svg>
                 <span>Back to Profile Portal</span>
             </a>
+            <button type="button" class="btn-refresh-task" id="btnRefreshTask" onclick="loadTask(true)">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M23 4v6h-6"></path>
+                    <path d="M1 20v-6h6"></path>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                <span>Refresh for Latest Updates</span>
+            </button>
         </div>
 
         <!-- Header -->
@@ -315,9 +339,16 @@
                 <strong id="badgeInternName">Loading...</strong>
             </div>
 
+            <!-- Inline Notification Banner -->
+            <div class="toast-banner" id="statusToast">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+                <span id="statusToastText">Task Response Submitted & Recorded Live!</span>
+            </div>
+
             <!-- Fixed Instruction: Step 1 -->
-            <div
-                style="background-color: var(--accent-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; gap: 10px;">
+            <div style="background-color: var(--accent-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; gap: 10px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
@@ -326,9 +357,7 @@
                     </svg>
                     <span><strong>Task 1:</strong> Complete your tech stack profile in the Skills section.</span>
                 </div>
-                <a href="skills.html"
-                    style="color: var(--text-primary); font-weight: 700; text-decoration: underline; font-size: 12px; white-space: nowrap;">Open
-                    Skills &rarr;</a>
+                <a href="skills.html" style="color: var(--text-primary); font-weight: 700; text-decoration: underline; font-size: 12px; white-space: nowrap;">Open Skills &rarr;</a>
             </div>
 
             <!-- Task Checklist Display -->
@@ -351,25 +380,16 @@
                 </svg>
                 Submit Your Project URL or Progress Notes
             </div>
-            <textarea id="taskResponseInput"
-                placeholder="Paste your GitHub repository URL, hosted demo link, or summary notes here..."></textarea>
+            <textarea id="taskResponseInput" placeholder="Paste your GitHub repository URL, hosted demo link, or summary notes here..."></textarea>
 
-            <button type="button" class="btn-submit" id="btnSubmitTask" onclick="submitTask()">
-                <span>Submit Task Response</span>
-            </button>
-        </div>
-
-        <!-- Success Screen -->
-        <div class="card success-card" id="successCard">
-            <div class="success-icon-wrapper">
-                <svg viewBox="0 0 24 24">
-                    <polyline points="20 6 9 17 4 12"></polyline>
-                </svg>
+            <div class="action-btn-row">
+                <button type="button" class="btn-submit" id="btnSubmitTask" onclick="submitTask()">
+                    <span>Submit Task Response</span>
+                </button>
+                <button type="button" class="btn-unsubmit" id="btnUnsubmitTask" style="display: none;" onclick="unsubmitTask()">
+                    <span>Unsubmit / Edit Submission</span>
+                </button>
             </div>
-            <h2 class="success-title">Task Response Submitted!</h2>
-            <p class="success-msg">Thank you, <strong id="successInternName"></strong>. Your completed task items and
-                progress notes have been sent to the admin dashboard.</p>
-            <a href="index.html" class="btn-secondary">Return to Profile Portal</a>
         </div>
     </div>
 
@@ -391,22 +411,26 @@
         document.getElementById('badgeInternName').textContent = `${currentIntern.assigned_name} (${currentIntern.email})`;
 
         let taskItemsList = [];
+        let previousSubmission = null;
 
-        // Load assigned tasks from Supabase
-        async function loadTask() {
+        // Load assigned tasks & existing submission from Supabase
+        async function loadTask(isManual = false) {
             const container = document.getElementById('checklistContainer');
+            const btnRefresh = document.getElementById('btnRefreshTask');
+            if (isManual && btnRefresh) btnRefresh.classList.add('spinning');
+
             try {
-                const { data, error } = await supabaseClient
+                // 1. Fetch assigned tasks
+                const { data: profData, error: profError } = await supabaseClient
                     .from('intern_profiles')
                     .select('assigned_task, assigned_name')
                     .eq('email', currentIntern.email)
                     .single();
 
-                if (error) throw error;
+                if (profError) throw profError;
 
-                const rawTaskText = (data && data.assigned_task) ? data.assigned_task : 'Complete your assigned project task.';
+                const rawTaskText = (profData && profData.assigned_task) ? profData.assigned_task : 'Complete your assigned project task.';
 
-                // Split multi-line or comma/semicolon tasks into items
                 taskItemsList = rawTaskText
                     .split(/\n|;/)
                     .map(t => t.trim())
@@ -423,17 +447,60 @@
                     </label>
                 `).join('');
 
+                // 2. Fetch existing task submission
+                const { data: subData, error: subError } = await supabaseClient
+                    .from('task_submissions')
+                    .select('*')
+                    .eq('intern_email', currentIntern.email)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (subData && subData.length > 0) {
+                    previousSubmission = subData[0];
+                    applyPreviousSubmission(previousSubmission);
+                }
+
             } catch (err) {
                 console.error('Error fetching task:', err);
-                container.innerHTML = `
-                    <label class="check-item">
-                        <input type="checkbox" class="task-checkbox" value="Assigned Task" id="chk_0">
-                        <span class="check-text">${escapeHtml(currentIntern.assigned_task || 'Complete assigned project tasks')}</span>
-                    </label>
-                `;
+            } finally {
+                if (isManual && btnRefresh) {
+                    setTimeout(() => btnRefresh.classList.remove('spinning'), 500);
+                }
             }
         }
         loadTask();
+
+        function applyPreviousSubmission(sub) {
+            const toast = document.getElementById('statusToast');
+            const toastText = document.getElementById('statusToastText');
+            const btnUnsubmit = document.getElementById('btnUnsubmitTask');
+            const btnSubmit = document.getElementById('btnSubmitTask');
+            const txtInput = document.getElementById('taskResponseInput');
+
+            // Parse response notes vs checklist
+            const resp = sub.task_response || '';
+            
+            // Check matching checkboxes
+            Array.from(document.querySelectorAll('.task-checkbox')).forEach(cb => {
+                if (resp.includes(cb.value)) {
+                    cb.checked = true;
+                }
+            });
+
+            // Extract notes
+            const notesMatch = resp.match(/Notes \/ URL:\n([\s\S]*)/);
+            if (notesMatch && notesMatch[1]) {
+                txtInput.value = notesMatch[1].trim();
+            } else if (!resp.includes('Completed Items')) {
+                txtInput.value = resp;
+            }
+
+            // Lock inputs & show status
+            toastText.textContent = `Task Response Submitted Live to Admin! (${formatDate(new Date(sub.created_at))})`;
+            toast.style.display = 'flex';
+            btnUnsubmit.style.display = 'inline-block';
+            btnSubmit.querySelector('span').textContent = 'Update Submission';
+        }
 
         async function submitTask() {
             const responseText = document.getElementById('taskResponseInput').value.trim();
@@ -446,7 +513,7 @@
 
             const btnSubmit = document.getElementById('btnSubmitTask');
             btnSubmit.disabled = true;
-            btnSubmit.innerHTML = `<span>Submitting to Admin...</span>`;
+            btnSubmit.querySelector('span').textContent = 'Submitting...';
 
             const completedSummary = checkedBoxes.length > 0
                 ? `Completed Items (${checkedBoxes.length}/${taskItemsList.length}):\n• ` + checkedBoxes.join('\n• ') + (responseText ? `\n\nNotes / URL:\n${responseText}` : '')
@@ -466,16 +533,46 @@
 
                 if (error) throw error;
 
-                document.getElementById('taskCard').style.display = 'none';
-                document.getElementById('successInternName').textContent = currentIntern.assigned_name;
-                document.getElementById('successCard').style.display = 'block';
+                // Show Toast Notification without hiding page!
+                const toast = document.getElementById('statusToast');
+                const toastText = document.getElementById('statusToastText');
+                toastText.textContent = '✓ Task Response Submitted & Recorded Live!';
+                toast.style.display = 'flex';
+
+                document.getElementById('btnUnsubmitTask').style.display = 'inline-block';
+                btnSubmit.disabled = false;
+                btnSubmit.querySelector('span').textContent = 'Update Submission';
 
             } catch (err) {
                 console.error('Task submission error:', err);
                 alert('Failed to submit task response: ' + (err.message || 'Please try again.'));
                 btnSubmit.disabled = false;
-                btnSubmit.innerHTML = `<span>Submit Task Response</span>`;
+                btnSubmit.querySelector('span').textContent = 'Submit Task Response';
             }
+        }
+
+        function unsubmitTask() {
+            if (!confirm('Unsubmit & unlock your task inputs to make changes?')) return;
+
+            const toast = document.getElementById('statusToast');
+            const btnSubmit = document.getElementById('btnSubmitTask');
+            const btnUnsubmit = document.getElementById('btnUnsubmitTask');
+
+            toast.style.display = 'none';
+            btnUnsubmit.style.display = 'none';
+            btnSubmit.querySelector('span').textContent = 'Resubmit Task Response';
+            alert('Your task inputs are now unlocked. Make your changes and click "Resubmit Task Response".');
+        }
+
+        function formatDate(date) {
+            if (isNaN(date.getTime())) return '';
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
         }
 
         function escapeHtml(str) {
@@ -489,5 +586,4 @@
         }
     </script>
 </body>
-
 </html>
