@@ -1,1 +1,777 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dominal Technology — Internship Intake</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #09090b;
+            --text-secondary: #71717a;
+            --text-muted: #a1a1aa;
+            --border-color: #e4e4e7;
+            --border-hover: #18181b;
+            --accent: #09090b;
+            --accent-light: #f4f4f5;
+            --error: #dc2626;
+            --error-bg: #fef2f2;
+            --success: #16a34a;
+            --success-bg: #f0fdf4;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 580px;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .brand-header {
+            margin-bottom: 32px;
+            text-align: left;
+        }
+
+        .brand-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .brand-logo svg {
+            width: 24px;
+            height: 24px;
+            fill: currentColor;
+        }
+
+        .brand-name {
+            font-weight: 700;
+            font-size: 14px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 15px;
+            color: var(--text-secondary);
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        /* Card / Form Container */
+        .intake-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        @media (max-width: 480px) {
+            .intake-card {
+                padding: 20px 16px;
+            }
+            h1 {
+                font-size: 22px;
+            }
+        }
+
+        .section-label {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-secondary);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .section-label svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Input Group */
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            gap: 8px;
+        }
+
+        input[type="text"], textarea {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: var(--transition);
+            outline: none;
+        }
+
+        input[type="text"]:focus, textarea:focus {
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.08);
+        }
+
+        input[type="text"]:disabled {
+            background-color: var(--accent-light);
+            color: var(--text-primary);
+            font-weight: 600;
+            cursor: not-allowed;
+            border-color: var(--border-color);
+        }
+
+        .btn-verify {
+            background-color: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 0 18px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition);
+        }
+
+        .btn-verify:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-verify:active {
+            transform: translateY(0);
+        }
+
+        .badge-verified {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background-color: var(--success-bg);
+            color: var(--success);
+            border: 1px solid rgba(22, 163, 74, 0.2);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .badge-verified svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .alert-error {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background-color: var(--error-bg);
+            color: var(--error);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            padding: 10px 12px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            margin-top: 10px;
+        }
+
+        .alert-error svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        /* Toggle Switches List */
+        .toggle-group {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .toggle-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            background-color: #ffffff;
+            transition: var(--transition);
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .toggle-item:hover {
+            border-color: var(--border-hover);
+            background-color: #fafafa;
+        }
+
+        .toggle-label {
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--text-primary);
+            padding-right: 12px;
+        }
+
+        .toggle-examples {
+            color: var(--text-secondary);
+            font-weight: 400;
+            font-size: 13px;
+        }
+
+        /* Custom Switch CSS */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+            flex-shrink: 0;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #e4e4e7;
+            transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        input:checked + .slider {
+            background-color: var(--text-primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        /* Textarea */
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+            font-family: inherit;
+        }
+
+        /* Main Submit Button */
+        .btn-submit {
+            width: 100%;
+            background-color: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 14px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-submit:hover:not(:disabled) {
+            opacity: 0.92;
+            transform: translateY(-1px);
+        }
+
+        .btn-submit:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* Disabled step opacity overlay */
+        .disabled-step {
+            opacity: 0.45;
+            pointer-events: none;
+            filter: grayscale(0.5);
+            transition: var(--transition);
+        }
+
+        /* Spin Animation */
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Success View */
+        .success-card {
+            display: none;
+            text-align: center;
+            padding: 40px 24px;
+        }
+
+        .success-icon-wrapper {
+            width: 64px;
+            height: 64px;
+            background-color: var(--success-bg);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px auto;
+            border: 1px solid rgba(22, 163, 74, 0.2);
+            animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .success-icon-wrapper svg {
+            width: 32px;
+            height: 32px;
+            stroke: var(--success);
+            stroke-width: 2.5;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            fill: none;
+        }
+
+        @keyframes popIn {
+            0% { transform: scale(0.6); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .success-title {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-primary);
+        }
+
+        .success-msg {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        .btn-secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text-primary);
+            background-color: var(--accent-light);
+        }
+
+        /* Footer */
+        .footer-text {
+            text-align: center;
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 24px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="brand-header">
+            <div class="brand-logo">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+                <span class="brand-name">Dominal Technology</span>
+            </div>
+            <h1>Software Development Internship</h1>
+            <p class="subtitle">Tell us what tools and technologies you enjoy working with. This is not a test or evaluation — just help us get to know you!</p>
+        </header>
+
+        <!-- Form Card -->
+        <div class="intake-card" id="formCard">
+            <!-- Step 1: Code Verification -->
+            <div class="form-group">
+                <div class="section-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    Step 1: Enter Your Unique Access Code
+                </div>
+                <div class="input-wrapper">
+                    <input type="text" id="codeFormInput" placeholder="e.g. DOM-101" autocomplete="off" spellcheck="false">
+                    <button type="button" class="btn-verify" id="btnVerify" onclick="verifyCode()">
+                        <span>Verify</span>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                            <polyline points="12 5 19 12 12 19"></polyline>
+                        </svg>
+                    </button>
+                </div>
+
+                <div class="alert-error" id="codeError">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="12"></line>
+                        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+                    </svg>
+                    <span id="codeErrorText">Invalid access code. Please check your assigned code.</span>
+                </div>
+
+                <div class="badge-verified" id="verifiedBadge" style="display: none;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3">
+                        <polyline points="20 6 9 17 4 12"></polyline>
+                    </svg>
+                    <span>Verified: <strong id="verifiedNameDisplay"></strong></span>
+                </div>
+            </div>
+
+            <!-- Step 2: Tech Stack Toggles & Custom Message -->
+            <div id="step2Container" class="disabled-step">
+                <div class="section-label">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
+                    Step 2: Select What You Know / Use
+                </div>
+
+                <div class="toggle-group">
+                    <label class="toggle-item" onclick="toggleCheckbox('websites')">
+                        <div class="toggle-label">Websites <span class="toggle-examples">(React, HTML, CSS, JavaScript)</span></div>
+                        <div class="switch">
+                            <input type="checkbox" id="websites">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-item" onclick="toggleCheckbox('apps')">
+                        <div class="toggle-label">Apps <span class="toggle-examples">(Flutter)</span></div>
+                        <div class="switch">
+                            <input type="checkbox" id="apps">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-item" onclick="toggleCheckbox('ui_ux')">
+                        <div class="toggle-label">UI/UX Design</div>
+                        <div class="switch">
+                            <input type="checkbox" id="ui_ux">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-item" onclick="toggleCheckbox('database')">
+                        <div class="toggle-label">Database <span class="toggle-examples">(SQL)</span></div>
+                        <div class="switch">
+                            <input type="checkbox" id="database">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-item" onclick="toggleCheckbox('backend')">
+                        <div class="toggle-label">Backend <span class="toggle-examples">(Python, etc.)</span></div>
+                        <div class="switch">
+                            <input type="checkbox" id="backend">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+
+                    <label class="toggle-item" onclick="toggleCheckbox('api_ai')">
+                        <div class="toggle-label">API / AI Integration</div>
+                        <div class="switch">
+                            <input type="checkbox" id="api_ai">
+                            <span class="slider"></span>
+                        </div>
+                    </label>
+                </div>
+
+                <!-- Custom Message -->
+                <div class="form-group">
+                    <div class="section-label">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                        Anything else you'd like to mention?
+                    </div>
+                    <textarea id="customMessage" placeholder="Tell us about any projects, interests, or other tech tools you like..."></textarea>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="button" class="btn-submit" id="btnSubmit" onclick="submitIntake()" disabled>
+                    <span id="submitBtnText">Submit Profile</span>
+                    <svg id="submitBtnIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="5" y1="12" x2="19" y2="12"></line>
+                        <polyline points="12 5 19 12 12 19"></polyline>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Success Screen -->
+        <div class="intake-card success-card" id="successCard">
+            <div class="success-icon-wrapper">
+                <svg viewBox="0 0 24 24">
+                    <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+            </div>
+            <h2 class="success-title">Profile Received!</h2>
+            <p class="success-msg">Thank you, <strong id="successInternName"></strong>. Your tech background preferences have been recorded. We're excited to work with you!</p>
+            <button type="button" class="btn-secondary" onclick="resetForm()">Submit Another Response</button>
+        </div>
+
+        <p class="footer-text">&copy; 2026 Dominal Technology. Internal Developer Intake Portal.</p>
+    </div>
+
+    <script>
+        // Supabase Initialization
+        const SUPABASE_URL = 'https://ucljwqqiusdruongdhvm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbGp3cXFpdXNkcnVvbmdkaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NjU2NzgsImV4cCI6MjA3ODQ0MTY3OH0.EgsMxTJ3UBXiL2jnToHvbhjBZtxngeVmtTTrsprKZMs';
+        
+        let supabaseClient = null;
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        let verifiedCode = '';
+        let verifiedInternName = '';
+
+        // Allow pressing Enter key in Code input to verify
+        document.getElementById('codeFormInput').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                verifyCode();
+            }
+        });
+
+        function toggleCheckbox(id) {
+            const el = document.getElementById(id);
+            if (el && !document.getElementById('step2Container').classList.contains('disabled-step')) {
+                // Event handled by native label click
+            }
+        }
+
+        async function verifyCode() {
+            const inputEl = document.getElementById('codeFormInput');
+            const errorEl = document.getElementById('codeError');
+            const errorTextEl = document.getElementById('codeErrorText');
+            const badgeEl = document.getElementById('verifiedBadge');
+            const badgeNameEl = document.getElementById('verifiedNameDisplay');
+            const btnVerify = document.getElementById('btnVerify');
+            const step2 = document.getElementById('step2Container');
+            const btnSubmit = document.getElementById('btnSubmit');
+
+            const rawCode = inputEl.value.trim().toUpperCase();
+
+            if (!rawCode) {
+                errorTextEl.textContent = 'Please enter your unique access code.';
+                errorEl.style.display = 'flex';
+                badgeEl.style.display = 'none';
+                return;
+            }
+
+            errorEl.style.display = 'none';
+            btnVerify.disabled = true;
+            btnVerify.innerHTML = `<div class="spinner"></div><span>Checking...</span>`;
+
+            try {
+                if (!supabaseClient) throw new Error('Supabase SDK failed to load.');
+
+                const { data, error } = await supabaseClient
+                    .from('intern_codes')
+                    .select('code, assigned_name')
+                    .eq('code', rawCode)
+                    .maybeSingle();
+
+                if (error) throw error;
+
+                if (!data) {
+                    errorTextEl.textContent = 'Invalid access code. Please check your assigned code and try again.';
+                    errorEl.style.display = 'flex';
+                    badgeEl.style.display = 'none';
+                    btnVerify.disabled = false;
+                    btnVerify.innerHTML = `<span>Verify</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+                    return;
+                }
+
+                // Verified successfully
+                verifiedCode = data.code;
+                verifiedInternName = data.assigned_name;
+
+                inputEl.value = verifiedCode;
+                inputEl.disabled = true;
+                btnVerify.style.display = 'none';
+
+                badgeNameEl.textContent = verifiedInternName;
+                badgeEl.style.display = 'inline-flex';
+
+                // Unlock Step 2
+                step2.classList.remove('disabled-step');
+                btnSubmit.disabled = false;
+
+            } catch (err) {
+                console.error('Verification error:', err);
+                errorTextEl.textContent = 'Unable to connect. Please check your network connection.';
+                errorEl.style.display = 'flex';
+                btnVerify.disabled = false;
+                btnVerify.innerHTML = `<span>Verify</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+            }
+        }
+
+        async function submitIntake() {
+            if (!verifiedCode || !verifiedInternName) return;
+
+            const btnSubmit = document.getElementById('btnSubmit');
+            const submitBtnText = document.getElementById('submitBtnText');
+            const submitBtnIcon = document.getElementById('submitBtnIcon');
+
+            const payload = {
+                unique_code: verifiedCode,
+                intern_name: verifiedInternName,
+                websites: document.getElementById('websites').checked,
+                apps: document.getElementById('apps').checked,
+                ui_ux: document.getElementById('ui_ux').checked,
+                database: document.getElementById('database').checked,
+                backend: document.getElementById('backend').checked,
+                api_ai: document.getElementById('api_ai').checked,
+                custom_message: document.getElementById('customMessage').value.trim() || null
+            };
+
+            btnSubmit.disabled = true;
+            submitBtnText.textContent = 'Submitting...';
+            submitBtnIcon.outerHTML = `<div class="spinner" id="submitBtnIcon"></div>`;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('submissions')
+                    .insert([payload]);
+
+                if (error) throw error;
+
+                // Success
+                document.getElementById('formCard').style.display = 'none';
+                document.getElementById('successInternName').textContent = verifiedInternName;
+                document.getElementById('successCard').style.display = 'block';
+
+            } catch (err) {
+                console.error('Submission error:', err);
+                alert('Submission failed: ' + (err.message || 'Please try again.'));
+                btnSubmit.disabled = false;
+                submitBtnText.textContent = 'Submit Profile';
+                const iconContainer = document.getElementById('submitBtnIcon');
+                if (iconContainer) {
+                    iconContainer.outerHTML = `<svg id="submitBtnIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+                }
+            }
+        }
+
+        function resetForm() {
+            verifiedCode = '';
+            verifiedInternName = '';
+
+            const inputEl = document.getElementById('codeFormInput');
+            inputEl.value = '';
+            inputEl.disabled = false;
+
+            const btnVerify = document.getElementById('btnVerify');
+            btnVerify.style.display = 'flex';
+            btnVerify.disabled = false;
+            btnVerify.innerHTML = `<span>Verify</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>`;
+
+            document.getElementById('verifiedBadge').style.display = 'none';
+            document.getElementById('codeError').style.display = 'none';
+
+            // Reset toggles
+            ['websites', 'apps', 'ui_ux', 'database', 'backend', 'api_ai'].forEach(id => {
+                document.getElementById(id).checked = false;
+            });
+            document.getElementById('customMessage').value = '';
+
+            document.getElementById('step2Container').classList.add('disabled-step');
+            document.getElementById('btnSubmit').disabled = true;
+
+            document.getElementById('successCard').style.display = 'none';
+            document.getElementById('formCard').style.display = 'block';
+        }
+    </script>
+</body>
+</html>
