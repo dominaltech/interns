@@ -511,7 +511,7 @@
                 intern_email: currentIntern.email,
                 intern_name: currentIntern.assigned_name,
                 task_title: checkedBoxes.length > 0 ? `Task Checklist (${checkedBoxes.length}/${taskItemsList.length} Checked)` : `Task Reset`,
-                task_response: checkedBoxes.length > 0 ? `Completed Items (${checkedBoxes.length}/${taskItemsList.length}):\n• ` + checkedBoxes.join('\n• ') : 'No items checked',
+                task_response: checkedBoxes.length > 0 ? `Completed Items (${checkedBoxes.length}/${taskItemsList.length}):\n• ` + checkedBoxes.join('\n• ') + (responseText ? `\n\nNotes / URL:\n${responseText}` : '') : (responseText || 'No items checked'),
                 project_url: responseText || null
             };
 
@@ -523,17 +523,32 @@
                     .eq('intern_email', currentIntern.email)
                     .limit(1);
 
+                let subError = null;
                 if (existingRows && existingRows.length > 0) {
-                    const { error } = await supabaseClient
+                    const res = await supabaseClient
                         .from('task_submissions')
                         .update(payload)
                         .eq('id', existingRows[0].id);
-                    if (error) throw error;
+                    subError = res.error;
                 } else {
-                    const { error } = await supabaseClient
+                    const res = await supabaseClient
                         .from('task_submissions')
                         .insert([payload]);
-                    if (error) throw error;
+                    subError = res.error;
+                }
+
+                // Fallback: If project_url column does not exist in Supabase yet, retry without project_url key
+                if (subError && (subError.message || '').includes('project_url')) {
+                    delete payload.project_url;
+                    if (existingRows && existingRows.length > 0) {
+                        const res = await supabaseClient.from('task_submissions').update(payload).eq('id', existingRows[0].id);
+                        if (res.error) throw res.error;
+                    } else {
+                        const res = await supabaseClient.from('task_submissions').insert([payload]);
+                        if (res.error) throw res.error;
+                    }
+                } else if (subError) {
+                    throw subError;
                 }
 
                 // Show Toast Notification
