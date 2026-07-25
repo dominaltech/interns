@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Your Profile — Dominal Technology (dominal.in)</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#09090b">
+    <link rel="apple-touch-icon" href="dominalnew.jpeg">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -52,8 +55,16 @@
 
         /* Brand Header */
         .brand-header {
-            margin-bottom: 32px;
-            text-align: left;
+            margin-bottom: 28px;
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .brand-left {
+            display: flex;
+            flex-direction: column;
         }
 
         .brand-logo {
@@ -101,6 +112,45 @@
         .subtitle {
             font-size: 14px;
             color: var(--text-secondary);
+        }
+
+        /* PWA Install Button */
+        .btn-install-pwa {
+            background-color: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 9px 14px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            white-space: nowrap;
+            transition: var(--transition);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .btn-install-pwa:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .btn-install-pwa svg {
+            width: 14px;
+            height: 14px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.5;
+        }
+
+        .btn-install-pwa.installed {
+            background-color: var(--accent-light);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+            cursor: default;
+            box-shadow: none;
         }
 
         /* Cards */
@@ -308,15 +358,27 @@
     <div class="container">
         <!-- Header -->
         <header class="brand-header">
-            <div class="brand-logo">
-                <img src="dominalnew.jpeg" alt="Dominal Logo" class="company-logo-img" onerror="this.style.display='none'">
-                <div class="brand-text-group">
-                    <span class="brand-name">Dominal Technology</span>
-                    <span class="site-badge">dominal.in</span>
+            <div class="brand-left">
+                <div class="brand-logo">
+                    <img src="dominalnew.jpeg" alt="Dominal Logo" class="company-logo-img" onerror="this.style.display='none'">
+                    <div class="brand-text-group">
+                        <span class="brand-name">Dominal Technology</span>
+                        <span class="site-badge">dominal.in</span>
+                    </div>
                 </div>
+                <h1>Your Profile Portal</h1>
+                <p class="subtitle">Access your internship tech profile, assigned tasks, and digital ID card.</p>
             </div>
-            <h1>Your Profile Portal</h1>
-            <p class="subtitle">Access your internship tech profile, assigned tasks, and digital ID card.</p>
+
+            <!-- Install App Button -->
+            <button type="button" class="btn-install-pwa" id="pwaInstallBtn" onclick="triggerPwaInstall()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span id="pwaBtnText">Install as App</span>
+            </button>
         </header>
 
         <!-- 1. LOGIN VIEW -->
@@ -440,6 +502,40 @@
         let supabaseClient = null;
         if (window.supabase) {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // Register PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').catch(err => console.error('SW Error:', err));
+        }
+
+        // PWA Install Prompt Handler
+        let deferredPrompt = null;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            const btn = document.getElementById('pwaInstallBtn');
+            if (btn) btn.style.display = 'flex';
+        });
+
+        window.addEventListener('appinstalled', () => {
+            deferredPrompt = null;
+            const btn = document.getElementById('pwaInstallBtn');
+            const text = document.getElementById('pwaBtnText');
+            if (btn) btn.classList.add('installed');
+            if (text) text.textContent = 'App Installed';
+        });
+
+        async function triggerPwaInstall() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                if (outcome === 'accepted') {
+                    deferredPrompt = null;
+                }
+            } else {
+                alert('To install Dominal Interns app, tap your browser menu (⋮ or Share) and select "Add to Home Screen" or "Install App".');
+            }
         }
 
         // Check active session
