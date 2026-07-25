@@ -1,23 +1,39 @@
 {
+  "id": "dominal-interns-pwa",
   "name": "Dominal Interns",
   "short_name": "Dominal Interns",
   "description": "Official Intern Profile, Task Portal & Digital ID Card Generator by Dominal Technology",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#ffffff",
   "theme_color": "#09090b",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "dominalnew.jpeg",
       "sizes": "192x192",
       "type": "image/jpeg",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "dominalnew.jpeg",
       "sizes": "512x512",
       "type": "image/jpeg",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "dominalnew.jpeg",
+      "sizes": "192x192",
+      "type": "image/jpeg",
+      "purpose": "maskable"
+    },
+    {
+      "src": "dominalnew.jpeg",
+      "sizes": "512x512",
+      "type": "image/jpeg",
+      "purpose": "maskable"
     }
   ]
 }
