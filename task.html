@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Assigned Task — Dominal Technology</title>
+    <title>Task Portal — Dominal Technology</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -16,11 +16,12 @@
             --text-muted: #a1a1aa;
             --border-color: #e4e4e7;
             --border-hover: #18181b;
-            --accent-light: #f4f4f5;
+            --accent-light: #fafafa;
             --success: #16a34a;
             --success-bg: #f0fdf4;
             --radius-lg: 14px;
             --radius-md: 8px;
+            --radius-sm: 6px;
             --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
@@ -50,7 +51,7 @@
             margin: 0 auto;
         }
 
-        /* Nav Top */
+        /* Top Nav */
         .top-nav {
             display: flex;
             align-items: center;
@@ -145,28 +146,44 @@
             height: 14px;
         }
 
-        /* Task Box */
-        .task-box {
-            background-color: var(--accent-light);
+        /* Checklist Box */
+        .checklist-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 12px 14px;
             border: 1px solid var(--border-color);
-            border-left: 4px solid var(--text-primary);
             border-radius: var(--radius-md);
-            padding: 20px;
-            margin-bottom: 28px;
+            background-color: #ffffff;
+            cursor: pointer;
+            transition: var(--transition);
+            user-select: none;
         }
 
-        .task-title {
-            font-size: 16px;
-            font-weight: 700;
-            margin-bottom: 8px;
-            color: var(--text-primary);
+        .check-item:hover {
+            border-color: var(--border-hover);
+            background-color: #fafafa;
         }
 
-        .task-instruction {
+        .check-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--text-primary);
+            cursor: pointer;
+            margin-top: 2px;
+        }
+
+        .check-text {
             font-size: 14px;
             color: var(--text-primary);
-            line-height: 1.6;
-            white-space: pre-line;
+            line-height: 1.4;
         }
 
         textarea {
@@ -179,7 +196,7 @@
             color: var(--text-primary);
             outline: none;
             resize: vertical;
-            min-height: 120px;
+            min-height: 110px;
             transition: var(--transition);
         }
 
@@ -274,19 +291,19 @@
     <div class="container">
         <!-- Top Nav -->
         <div class="top-nav">
-            <a href="main.html" class="btn-back">
+            <a href="index.html" class="btn-back">
                 <svg viewBox="0 0 24 24">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                <span>Back to Profile</span>
+                <span>Back to Profile Portal</span>
             </a>
         </div>
 
         <!-- Header -->
         <header class="brand-header">
-            <h1>Temporary Task Portal</h1>
-            <p class="subtitle">View your practical assignment instructions and submit your progress notes/links.</p>
+            <h1>Task Portal</h1>
+            <p class="subtitle">Tick off your completed task checklist and submit your project link / notes.</p>
         </header>
 
         <!-- Main Card -->
@@ -296,17 +313,26 @@
                 <strong id="badgeInternName">Loading...</strong>
             </div>
 
-            <!-- Task Display Box -->
+            <!-- Fixed Instruction: Step 1 -->
+            <div style="background-color: var(--accent-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; gap: 10px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    <span><strong>Task 1:</strong> Complete your tech stack profile in the Skills section.</span>
+                </div>
+                <a href="skills.html" style="color: var(--text-primary); font-weight: 700; text-decoration: underline; font-size: 12px; white-space: nowrap;">Open Skills &rarr;</a>
+            </div>
+
+            <!-- Task Checklist Display -->
             <div class="section-label">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                 </svg>
-                Your Assigned Task Instructions
+                Task 2: Your Assigned Task Items (Tick when completed)
             </div>
-            <div class="task-box">
-                <div class="task-title" id="displayTaskTitle">Assigned Project Task</div>
-                <div class="task-instruction" id="displayTaskInstruction">Loading your assigned task instructions...</div>
+
+            <div class="checklist-group" id="checklistContainer">
+                <div style="font-size: 13px; color: var(--text-muted);">Loading task items...</div>
             </div>
 
             <!-- Task Response Form -->
@@ -314,7 +340,7 @@
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
                 </svg>
-                Submit Your Completion Notes or Project URL
+                Submit Your Project URL or Progress Notes
             </div>
             <textarea id="taskResponseInput" placeholder="Paste your GitHub repository URL, hosted demo link, or summary notes here..."></textarea>
 
@@ -331,8 +357,8 @@
                 </svg>
             </div>
             <h2 class="success-title">Task Response Submitted!</h2>
-            <p class="success-msg">Thank you, <strong id="successInternName"></strong>. Your task progress has been recorded and sent to the team.</p>
-            <a href="main.html" class="btn-secondary">Return to Profile Portal</a>
+            <p class="success-msg">Thank you, <strong id="successInternName"></strong>. Your completed task items and progress notes have been sent to the admin dashboard.</p>
+            <a href="index.html" class="btn-secondary">Return to Profile Portal</a>
         </div>
     </div>
 
@@ -348,52 +374,78 @@
         // Authenticated intern check
         const sessionRaw = sessionStorage.getItem('intern_session');
         if (!sessionRaw) {
-            window.location.href = 'main.html';
+            window.location.href = 'index.html';
         }
         const currentIntern = JSON.parse(sessionRaw);
         document.getElementById('badgeInternName').textContent = `${currentIntern.assigned_name} (${currentIntern.email})`;
 
-        let activeTaskTitle = 'Assigned Project Task';
+        let taskItemsList = [];
 
-        // Load fresh assigned task from Supabase
+        // Load assigned tasks from Supabase
         async function loadTask() {
+            const container = document.getElementById('checklistContainer');
             try {
                 const { data, error } = await supabaseClient
                     .from('intern_profiles')
-                    .select('assigned_task')
+                    .select('assigned_task, assigned_name')
                     .eq('email', currentIntern.email)
                     .single();
 
                 if (error) throw error;
 
-                if (data && data.assigned_task) {
-                    document.getElementById('displayTaskInstruction').textContent = data.assigned_task;
-                } else {
-                    document.getElementById('displayTaskInstruction').textContent = 'No specific task assigned yet. Please check back soon!';
+                const rawTaskText = (data && data.assigned_task) ? data.assigned_task : 'Complete your assigned project task.';
+                
+                // Split multi-line or comma/semicolon tasks into items
+                taskItemsList = rawTaskText
+                    .split(/\n|;/)
+                    .map(t => t.trim())
+                    .filter(t => t.length > 0);
+
+                if (taskItemsList.length === 0) {
+                    taskItemsList = [rawTaskText];
                 }
+
+                container.innerHTML = taskItemsList.map((itemText, idx) => `
+                    <label class="check-item">
+                        <input type="checkbox" class="task-checkbox" value="${escapeHtml(itemText)}" id="chk_${idx}">
+                        <span class="check-text">${escapeHtml(itemText)}</span>
+                    </label>
+                `).join('');
+
             } catch (err) {
                 console.error('Error fetching task:', err);
-                document.getElementById('displayTaskInstruction').textContent = currentIntern.assigned_task || 'Please submit your task progress below.';
+                container.innerHTML = `
+                    <label class="check-item">
+                        <input type="checkbox" class="task-checkbox" value="Assigned Task" id="chk_0">
+                        <span class="check-text">${escapeHtml(currentIntern.assigned_task || 'Complete assigned project tasks')}</span>
+                    </label>
+                `;
             }
         }
         loadTask();
 
         async function submitTask() {
             const responseText = document.getElementById('taskResponseInput').value.trim();
-            if (!responseText) {
-                alert('Please enter your project URL or task completion notes before submitting.');
+            const checkedBoxes = Array.from(document.querySelectorAll('.task-checkbox:checked')).map(cb => cb.value);
+
+            if (checkedBoxes.length === 0 && !responseText) {
+                alert('Please tick at least one completed task item or provide your project URL / notes.');
                 return;
             }
 
             const btnSubmit = document.getElementById('btnSubmitTask');
             btnSubmit.disabled = true;
-            btnSubmit.innerHTML = `<span>Submitting...</span>`;
+            btnSubmit.innerHTML = `<span>Submitting to Admin...</span>`;
+
+            const completedSummary = checkedBoxes.length > 0
+                ? `Completed Items (${checkedBoxes.length}/${taskItemsList.length}):\n• ` + checkedBoxes.join('\n• ') + (responseText ? `\n\nNotes / URL:\n${responseText}` : '')
+                : responseText;
 
             const payload = {
                 intern_email: currentIntern.email,
                 intern_name: currentIntern.assigned_name,
-                task_title: activeTaskTitle,
-                task_response: responseText
+                task_title: `Task Checklist (${checkedBoxes.length}/${taskItemsList.length} Checked)`,
+                task_response: completedSummary
             };
 
             try {
@@ -413,6 +465,16 @@
                 btnSubmit.disabled = false;
                 btnSubmit.innerHTML = `<span>Submit Task Response</span>`;
             }
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
         }
     </script>
 </body>
