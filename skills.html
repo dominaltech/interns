@@ -443,7 +443,7 @@
             </div>
             <h2 class="success-title">Skills Profile Saved!</h2>
             <p class="success-msg">Thank you, <strong id="successInternName"></strong>. Your tech preferences have been recorded.</p>
-            <a href="main.html" class="btn-secondary">Return to Profile Portal</a>
+            <a href="index.html" class="btn-secondary">Return to Profile Portal</a>
         </div>
     </div>
 
@@ -463,6 +463,36 @@
         }
         const currentIntern = JSON.parse(sessionRaw);
         document.getElementById('badgeInternName').textContent = `${currentIntern.assigned_name} (${currentIntern.email})`;
+
+        // Load existing skills if already submitted by intern
+        async function loadExistingSkills() {
+            try {
+                if (!supabaseClient) return;
+                const { data, error } = await supabaseClient
+                    .from('skills_submissions')
+                    .select('*')
+                    .eq('intern_email', currentIntern.email)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (data && data.length > 0) {
+                    const existing = data[0];
+                    document.getElementById('websites').checked = !!existing.websites;
+                    document.getElementById('apps').checked = !!existing.apps;
+                    document.getElementById('ui_ux').checked = !!existing.ui_ux;
+                    document.getElementById('database').checked = !!existing.database;
+                    document.getElementById('backend').checked = !!existing.backend;
+                    document.getElementById('api_ai').checked = !!existing.api_ai;
+                    if (existing.custom_message) {
+                        document.getElementById('customMessage').value = existing.custom_message;
+                    }
+                    document.getElementById('btnSubmit').innerHTML = `<span>Update Tech Profile</span>`;
+                }
+            } catch (e) {
+                console.error('Error pre-filling skills:', e);
+            }
+        }
+        loadExistingSkills();
 
         async function submitSkills() {
             const btnSubmit = document.getElementById('btnSubmit');
