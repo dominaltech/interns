@@ -492,6 +492,93 @@
             color: var(--text-primary);
             max-width: 360px;
         }
+
+        /* Multi-Task Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(9, 9, 11, 0.5);
+            backdrop-filter: blur(4px);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 520px;
+            padding: 28px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 12px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .btn-close-modal {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-muted);
+        }
+
+        .task-list-builder {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 16px;
+            padding-right: 4px;
+        }
+
+        .task-item-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .task-item-num {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--text-secondary);
+            width: 50px;
+            flex-shrink: 0;
+        }
+
+        .btn-add-task-line {
+            background: var(--accent-light);
+            border: 1px dashed var(--border-color);
+            color: var(--text-primary);
+            width: 100%;
+            padding: 10px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-bottom: 20px;
+        }
+
+        .btn-add-task-line:hover {
+            border-color: var(--text-primary);
+        }
     </style>
 </head>
 <body>
@@ -592,8 +679,8 @@
                         <input type="text" id="newInternPassword" placeholder="e.g. pass123">
                     </div>
                     <div class="form-group">
-                        <label class="input-label">Assigned Task Instructions (Separate multiple items with newlines)</label>
-                        <input type="text" id="newInternTask" placeholder="e.g. 1. Build landing page&#10;2. Host on GitHub">
+                        <label class="input-label">Assigned Task Instructions (Multi-line supported)</label>
+                        <input type="text" id="newInternTask" placeholder="e.g. Build landing page | Integrate API">
                     </div>
                 </div>
 
@@ -604,7 +691,7 @@
 
             <div class="panel-card">
                 <div class="panel-title">Existing Intern Accounts</div>
-                <div class="panel-subtitle">Manage profiles, update assigned tasks, or remove accounts.</div>
+                <div class="panel-subtitle">Manage profiles, update multi-task checklists, or remove accounts.</div>
 
                 <div class="table-responsive">
                     <table>
@@ -692,6 +779,29 @@
         </div>
     </div>
 
+    <!-- MULTI-TASK EDIT MODAL -->
+    <div class="modal-overlay" id="multiTaskModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTargetEmail">Manage Assigned Tasks</div>
+                <button class="btn-close-modal" onclick="closeTaskModal()">&times;</button>
+            </div>
+
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 16px;">Add, edit, or remove task items for this intern. Each item becomes an interactive checkbox on their Task Portal.</p>
+
+            <div class="task-list-builder" id="modalTaskContainer">
+                <!-- Dynamically populated task inputs -->
+            </div>
+
+            <button type="button" class="btn-add-task-line" onclick="addTaskInputRow('')">+ Add Another Task Item</button>
+
+            <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                <button type="button" class="btn-logout" onclick="closeTaskModal()">Cancel</button>
+                <button type="button" class="btn-action" onclick="saveTaskModal()">Save All Tasks</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         const SUPABASE_URL = 'https://ucljwqqiusdruongdhvm.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbGp3cXFpdXNkcnVvbmdkaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NjU2NzgsImV4cCI6MjA3ODQ0MTY3OH0.EgsMxTJ3UBXiL2jnToHvbhjBZtxngeVmtTTrsprKZMs';
@@ -704,6 +814,7 @@
         let cacheInterns = [];
         let cacheSkills = [];
         let cacheTasks = [];
+        let activeEditEmail = null;
 
         // Check authentication
         if (sessionStorage.getItem('adminAuthenticated') === 'true') {
@@ -800,7 +911,7 @@
                     <td><span class="badge-code">${escapeHtml(item.password)}</span></td>
                     <td style="max-width: 280px; font-size: 12px; white-space: pre-line; color: var(--text-secondary);">${escapeHtml(item.assigned_task || 'No task assigned')}</td>
                     <td>
-                        <button class="btn-sm-edit" onclick="editTaskPrompt('${escapeHtml(item.email)}', '${escapeHtml(item.assigned_task || '')}')">Edit Task</button>
+                        <button class="btn-sm-edit" onclick="openMultiTaskModal('${escapeHtml(item.email)}', '${escapeHtml(item.assigned_task || '')}')">Edit Tasks</button>
                         <button class="btn-sm-danger" onclick="deleteIntern('${escapeHtml(item.email)}')">Delete</button>
                     </td>
                 </tr>
@@ -839,22 +950,74 @@
             }
         }
 
-        async function editTaskPrompt(email, currentTask) {
-            const updatedTask = prompt('Update assigned task instructions for ' + email + ':', currentTask);
-            if (updatedTask === null) return;
+        // Multi-Task Modal Logic
+        function openMultiTaskModal(email, currentTasksRaw) {
+            activeEditEmail = email;
+            document.getElementById('modalTargetEmail').textContent = `Tasks for ${email}`;
+            const container = document.getElementById('modalTaskContainer');
+            container.innerHTML = '';
+
+            const taskLines = (currentTasksRaw || '')
+                .split(/\n|;/)
+                .map(t => t.trim())
+                .filter(t => t.length > 0);
+
+            if (taskLines.length === 0) {
+                addTaskInputRow('');
+            } else {
+                taskLines.forEach(line => addTaskInputRow(line));
+            }
+
+            document.getElementById('multiTaskModal').style.display = 'flex';
+        }
+
+        function addTaskInputRow(val = '') {
+            const container = document.getElementById('modalTaskContainer');
+            const rowCount = container.children.length + 1;
+            const div = document.createElement('div');
+            div.className = 'task-item-row';
+            div.innerHTML = `
+                <span class="task-item-num">Task ${rowCount}:</span>
+                <input type="text" class="task-modal-input" value="${escapeHtml(val)}" placeholder="Task description...">
+                <button type="button" class="btn-sm-danger" onclick="this.parentElement.remove(); renumberTaskModalRows();">&times;</button>
+            `;
+            container.appendChild(div);
+        }
+
+        function renumberTaskModalRows() {
+            const container = document.getElementById('modalTaskContainer');
+            Array.from(container.children).forEach((row, idx) => {
+                row.querySelector('.task-item-num').textContent = `Task ${idx + 1}:`;
+            });
+        }
+
+        function closeTaskModal() {
+            document.getElementById('multiTaskModal').style.display = 'none';
+            activeEditEmail = null;
+        }
+
+        async function saveTaskModal() {
+            if (!activeEditEmail) return;
+
+            const inputs = Array.from(document.querySelectorAll('.task-modal-input'))
+                .map(i => i.value.trim())
+                .filter(v => v.length > 0);
+
+            const combinedTaskText = inputs.join('\n');
 
             try {
                 const { data, error } = await supabaseClient
                     .from('intern_profiles')
-                    .update({ assigned_task: updatedTask.trim() })
-                    .eq('email', email);
+                    .update({ assigned_task: combinedTaskText })
+                    .eq('email', activeEditEmail);
 
                 if (error) throw error;
 
+                closeTaskModal();
                 fetchInterns();
             } catch (err) {
-                console.error('Error updating task:', err);
-                alert('Failed to update task.');
+                console.error('Error saving modal tasks:', err);
+                alert('Failed to save tasks: ' + err.message);
             }
         }
 
