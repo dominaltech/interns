@@ -1,1 +1,771 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dominal Technology — Admin Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #09090b;
+            --text-secondary: #71717a;
+            --text-muted: #a1a1aa;
+            --border-color: #e4e4e7;
+            --border-hover: #18181b;
+            --accent-light: #f4f4f5;
+            --error: #dc2626;
+            --error-bg: #fef2f2;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* Login Screen */
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            text-align: center;
+        }
+
+        .login-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--accent-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px auto;
+        }
+
+        .login-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-primary);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .login-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .input-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .input-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.08);
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 8px;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+        }
+
+        .alert-error {
+            display: none;
+            background-color: var(--error-bg);
+            color: var(--error);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        /* Dashboard Container */
+        .dashboard-layout {
+            display: none;
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 40px 20px 80px 20px;
+        }
+
+        /* Header Bar */
+        .dash-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 24px;
+        }
+
+        .dash-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dash-brand svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .dash-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .dash-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-logout:hover {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        /* Controls Row */
+        .controls-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .search-box {
+            position: relative;
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-muted);
+        }
+
+        .search-input {
+            padding-left: 36px !important;
+        }
+
+        .btn-refresh {
+            background-color: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 10px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-refresh:hover {
+            opacity: 0.9;
+        }
+
+        .btn-refresh svg {
+            width: 15px;
+            height: 15px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.5;
+            transition: transform 0.4s ease;
+        }
+
+        .btn-refresh.spinning svg {
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 18px;
+            background-color: #ffffff;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* Submissions Cards List */
+        .submissions-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .submission-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            background-color: #ffffff;
+            transition: var(--transition);
+        }
+
+        .submission-card:hover {
+            border-color: var(--border-hover);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.03);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .intern-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .intern-name {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .code-pill {
+            background-color: var(--accent-light);
+            border: 1px solid var(--border-color);
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 12px;
+            font-weight: 700;
+            font-family: monospace;
+            color: var(--text-primary);
+        }
+
+        .timestamp {
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .timestamp svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        /* Badges / Tech Pills */
+        .stack-pills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 14px;
+        }
+
+        .stack-badge {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stack-badge svg {
+            width: 12px;
+            height: 12px;
+            stroke: currentColor;
+            stroke-width: 2.5;
+            fill: none;
+        }
+
+        .custom-msg-box {
+            background-color: var(--accent-light);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            font-size: 13px;
+            color: var(--text-primary);
+            line-height: 1.5;
+            margin-top: 10px;
+            border-left: 3px solid var(--text-primary);
+        }
+
+        .custom-msg-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            border: 1px dashed var(--border-color);
+            border-radius: var(--radius-lg);
+        }
+
+        .empty-icon {
+            width: 48px;
+            height: 48px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .empty-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .empty-text {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. PASSWORD GATE / LOGIN SCREEN -->
+    <div class="login-wrapper" id="loginView">
+        <div class="login-card">
+            <div class="login-icon">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h1 class="login-title">Admin Dashboard</h1>
+            <p class="login-subtitle">Dominal Technology Intake Portal</p>
+
+            <div class="alert-error" id="loginError">
+                Invalid username or password. Please try again.
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Username</label>
+                <input type="text" id="loginUser" placeholder="admin" autocomplete="off">
+            </div>
+
+            <div class="input-group">
+                <label class="input-label">Password</label>
+                <input type="password" id="loginPass" placeholder="••••••••" autocomplete="off">
+            </div>
+
+            <button type="button" class="btn-login" onclick="attemptLogin()">Sign In</button>
+        </div>
+    </div>
+
+    <!-- 2. MAIN DASHBOARD VIEW -->
+    <div class="dashboard-layout" id="dashboardView">
+        <!-- Top Bar -->
+        <header class="dash-header">
+            <div class="dash-brand">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+                <div>
+                    <h1 class="dash-title">Submissions Intake</h1>
+                    <p class="dash-sub">Dominal Technology — Software Engineering Candidates</p>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                    <polyline points="16 17 21 12 16 7"></polyline>
+                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                </svg>
+                Sign Out
+            </button>
+        </header>
+
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Total Submissions</div>
+                <div class="stat-value" id="statTotal">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Top Category</div>
+                <div class="stat-value" id="statTopCategory" style="font-size: 18px;">—</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Latest Activity</div>
+                <div class="stat-value" id="statLatestTime" style="font-size: 15px; font-weight: 600;">—</div>
+            </div>
+        </div>
+
+        <!-- Controls Bar -->
+        <div class="controls-bar">
+            <div class="search-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                </svg>
+                <input type="text" class="search-input" id="searchInput" placeholder="Search by name, code, or message..." oninput="filterSubmissions()">
+            </div>
+            <button class="btn-refresh" id="btnRefresh" onclick="fetchSubmissions(true)">
+                <svg viewBox="0 0 24 24">
+                    <path d="M23 4v6h-6"></path>
+                    <path d="M1 20v-6h6"></path>
+                    <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                </svg>
+                <span>Refresh Data</span>
+            </button>
+        </div>
+
+        <!-- Submissions Cards Feed -->
+        <div class="submissions-list" id="submissionsFeed">
+            <!-- Dynamic Content Loaded Here -->
+        </div>
+    </div>
+
+    <script>
+        // Supabase Initialization
+        const SUPABASE_URL = 'https://ucljwqqiusdruongdhvm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbGp3cXFpdXNkcnVvbmdkaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NjU2NzgsImV4cCI6MjA3ODQ0MTY3OH0.EgsMxTJ3UBXiL2jnToHvbhjBZtxngeVmtTTrsprKZMs';
+
+        let supabaseClient = null;
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        let allSubmissions = [];
+
+        // Check active session on load
+        if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+            showDashboard();
+        }
+
+        // Enter key for login
+        document.getElementById('loginPass').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') attemptLogin();
+        });
+
+        function attemptLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const errEl = document.getElementById('loginError');
+
+            if (user === 'admin' && pass === 'admin123') {
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                errEl.style.display = 'none';
+                showDashboard();
+            } else {
+                errEl.style.display = 'block';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('adminAuthenticated');
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('loginView').style.display = 'flex';
+        }
+
+        function showDashboard() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('dashboardView').style.display = 'block';
+            fetchSubmissions();
+        }
+
+        async function fetchSubmissions(isManualRefresh = false) {
+            const refreshBtn = document.getElementById('btnRefresh');
+            if (isManualRefresh && refreshBtn) {
+                refreshBtn.classList.add('spinning');
+            }
+
+            try {
+                if (!supabaseClient) throw new Error('Supabase client missing');
+
+                const { data, error } = await supabaseClient
+                    .from('submissions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                allSubmissions = data || [];
+                renderStats(allSubmissions);
+                filterSubmissions();
+
+            } catch (err) {
+                console.error('Error fetching submissions:', err);
+            } finally {
+                if (refreshBtn) {
+                    setTimeout(() => refreshBtn.classList.remove('spinning'), 500);
+                }
+            }
+        }
+
+        function renderStats(data) {
+            document.getElementById('statTotal').textContent = data.length;
+
+            if (data.length === 0) {
+                document.getElementById('statTopCategory').textContent = '—';
+                document.getElementById('statLatestTime').textContent = '—';
+                return;
+            }
+
+            // Top Category calculation
+            const counts = {
+                'Websites': 0,
+                'Apps': 0,
+                'UI/UX': 0,
+                'Database': 0,
+                'Backend': 0,
+                'API / AI': 0
+            };
+
+            data.forEach(item => {
+                if (item.websites) counts['Websites']++;
+                if (item.apps) counts['Apps']++;
+                if (item.ui_ux) counts['UI/UX']++;
+                if (item.database) counts['Database']++;
+                if (item.backend) counts['Backend']++;
+                if (item.api_ai) counts['API / AI']++;
+            });
+
+            let topCat = 'Websites';
+            let maxCount = -1;
+            for (const [cat, cnt] of Object.entries(counts)) {
+                if (cnt > maxCount) {
+                    maxCount = cnt;
+                    topCat = cat;
+                }
+            }
+            document.getElementById('statTopCategory').textContent = `${topCat} (${maxCount})`;
+
+            // Latest Activity
+            const latest = new Date(data[0].created_at);
+            document.getElementById('statLatestTime').textContent = formatDate(latest);
+        }
+
+        function filterSubmissions() {
+            const query = document.getElementById('searchInput').value.toLowerCase().trim();
+            const feed = document.getElementById('submissionsFeed');
+
+            const filtered = allSubmissions.filter(item => {
+                const name = (item.intern_name || '').toLowerCase();
+                const code = (item.unique_code || '').toLowerCase();
+                const msg = (item.custom_message || '').toLowerCase();
+                return name.includes(query) || code.includes(query) || msg.includes(query);
+            });
+
+            if (filtered.length === 0) {
+                feed.innerHTML = `
+                    <div class="empty-state">
+                        <svg class="empty-icon" viewBox="0 0 24 24">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <line x1="8" y1="12" x2="16" y2="12"></line>
+                        </svg>
+                        <div class="empty-title">No submissions found</div>
+                        <div class="empty-text">No intern responses match your search filter yet.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            feed.innerHTML = filtered.map(item => {
+                const formattedDate = formatDate(new Date(item.created_at));
+                
+                const stacks = [];
+                if (item.websites) stacks.push('Websites (React/JS)');
+                if (item.apps) stacks.push('Apps (Flutter)');
+                if (item.ui_ux) stacks.push('UI/UX Design');
+                if (item.database) stacks.push('Database (SQL)');
+                if (item.backend) stacks.push('Backend (Python)');
+                if (item.api_ai) stacks.push('API / AI Integration');
+
+                const stackBadgesHtml = stacks.length > 0 
+                    ? stacks.map(s => `
+                        <span class="stack-badge">
+                            <svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                            ${escapeHtml(s)}
+                        </span>
+                      `).join('')
+                    : `<span class="stack-badge" style="color:var(--text-muted);">No stack items checked</span>`;
+
+                const customMsgHtml = item.custom_message 
+                    ? `
+                        <div class="custom-msg-box">
+                            <div class="custom-msg-title">Additional Notes</div>
+                            ${escapeHtml(item.custom_message)}
+                        </div>
+                      `
+                    : '';
+
+                return `
+                    <div class="submission-card">
+                        <div class="card-header">
+                            <div class="intern-info">
+                                <span class="intern-name">${escapeHtml(item.intern_name)}</span>
+                                <span class="code-pill">${escapeHtml(item.unique_code)}</span>
+                            </div>
+                            <div class="timestamp">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                                ${formattedDate}
+                            </div>
+                        </div>
+
+                        <div class="stack-pills">
+                            ${stackBadgesHtml}
+                        </div>
+
+                        ${customMsgHtml}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function formatDate(date) {
+            if (isNaN(date.getTime())) return '';
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>
