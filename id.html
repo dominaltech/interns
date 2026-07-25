@@ -273,10 +273,13 @@
             object-fit: cover;
             border-radius: 6px;
             border: 1px solid var(--border-color);
+            flex-shrink: 0;
         }
 
         .id-brand-text {
             text-align: left;
+            display: flex;
+            flex-direction: column;
         }
 
         .id-brand-name {
@@ -712,14 +715,14 @@
             // 2. Outer Dark Border
             ctx.strokeStyle = '#09090b';
             ctx.lineWidth = 8;
-            ctx.strokeRect(10, 10, W - 20, H - 20);
+            ctx.strokeRect(12, 12, W - 24, H - 24);
 
             // 3. Header Line
             ctx.strokeStyle = '#e4e4e7';
             ctx.lineWidth = 3;
             ctx.beginPath();
-            ctx.moveTo(30, 150);
-            ctx.lineTo(W - 30, 150);
+            ctx.moveTo(36, 140);
+            ctx.lineTo(W - 36, 140);
             ctx.stroke();
 
             // Load and draw Logo
@@ -727,26 +730,29 @@
                 const logoImg = new Image();
                 logoImg.src = 'dominalnew.jpeg';
                 await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; });
-                ctx.drawImage(logoImg, 40, 35, 90, 90);
+                ctx.drawImage(logoImg, 40, 36, 76, 76);
             } catch (e) {}
 
-            // Brand Text
+            // Brand Text cleanly separated from logo!
+            ctx.textAlign = 'left';
             ctx.fillStyle = '#09090b';
-            ctx.font = 'bold 30px Inter, sans-serif';
-            ctx.fillText('DOMINAL TECH', 150, 75);
+            ctx.font = 'bold 28px Inter, sans-serif';
+            ctx.fillText('DOMINAL TECH', 132, 70);
+            
             ctx.fillStyle = '#71717a';
-            ctx.font = '500 22px Inter, sans-serif';
-            ctx.fillText('dominal.in', 150, 110);
+            ctx.font = '500 20px Inter, sans-serif';
+            ctx.fillText('dominal.in', 132, 98);
 
             // Intern Badge Pill
             ctx.fillStyle = '#09090b';
             ctx.beginPath();
-            ctx.roundRect(W - 180, 50, 140, 50, 25);
+            ctx.roundRect(W - 176, 48, 136, 48, 24);
             ctx.fill();
+
             ctx.fillStyle = '#ffffff';
-            ctx.font = 'bold 22px Inter, sans-serif';
+            ctx.font = 'bold 20px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('INTERN', W - 110, 83);
+            ctx.fillText('INTERN', W - 108, 80);
             ctx.textAlign = 'left';
 
             let nameY = 530;
@@ -755,14 +761,11 @@
 
             // 4. Draw Photo Frame ONLY if photo toggle is ON
             if (showPhoto) {
-                const photoX = W / 2 - 120;
-                const photoY = 190;
+                const photoX = W / 2 - 120; // 240px wide
+                const photoY = 180;
                 const photoW = 240;
                 const photoH = 280;
-
-                ctx.strokeStyle = '#09090b';
-                ctx.lineWidth = 4;
-                ctx.strokeRect(photoX, photoY, photoW, photoH);
+                const radius = 24;
 
                 if (userPhotoDataUrl) {
                     try {
@@ -771,31 +774,72 @@
                         await new Promise((res) => { uPhoto.onload = res; });
 
                         const fitMode = document.getElementById('cropFitMode').value;
+                        const imgRatio = uPhoto.width / uPhoto.height;
+                        const frameRatio = photoW / photoH;
+
+                        ctx.save();
+                        ctx.beginPath();
+                        ctx.roundRect(photoX, photoY, photoW, photoH, radius);
+                        ctx.clip(); // Clip photo frame perfectly!
+
+                        let drawW, drawH, drawX, drawY;
+
                         if (fitMode === 'contain') {
                             ctx.fillStyle = '#ffffff';
                             ctx.fillRect(photoX, photoY, photoW, photoH);
 
-                            const hRatio = photoW / uPhoto.width;
-                            const vRatio = photoH / uPhoto.height;
-                            const ratio  = Math.min(hRatio, vRatio);
-                            const centerShift_x = photoX + (photoW - uPhoto.width * ratio) / 2;
-                            const centerShift_y = photoY + (photoH - uPhoto.height * ratio) / 2;
-                            ctx.drawImage(uPhoto, 0, 0, uPhoto.width, uPhoto.height, centerShift_x, centerShift_y, uPhoto.width * ratio, uPhoto.height * ratio);
+                            if (imgRatio > frameRatio) {
+                                drawW = photoW;
+                                drawH = photoW / imgRatio;
+                                drawX = photoX;
+                                drawY = photoY + (photoH - drawH) / 2;
+                            } else {
+                                drawH = photoH;
+                                drawW = photoH * imgRatio;
+                                drawX = photoX + (photoW - drawW) / 2;
+                                drawY = photoY;
+                            }
                         } else {
-                            ctx.drawImage(uPhoto, photoX, photoY, photoW, photoH);
+                            // Cover Mode (Default) - Preserve exact un-squished aspect ratio!
+                            if (imgRatio > frameRatio) {
+                                drawH = photoH;
+                                drawW = photoH * imgRatio;
+                                drawX = photoX + (photoW - drawW) / 2;
+                                drawY = photoY;
+                            } else {
+                                drawW = photoW;
+                                drawH = photoW / imgRatio;
+                                drawX = photoX;
+                                drawY = photoY + (photoH - drawH) / 2;
+                            }
                         }
+
+                        ctx.drawImage(uPhoto, drawX, drawY, drawW, drawH);
+                        ctx.restore();
+
                     } catch (e) {}
                 } else {
                     ctx.fillStyle = '#ffffff';
-                    ctx.fillRect(photoX, photoY, photoW, photoH);
+                    ctx.beginPath();
+                    ctx.roundRect(photoX, photoY, photoW, photoH, radius);
+                    ctx.fill();
+
                     ctx.fillStyle = '#a1a1aa';
-                    ctx.font = 'bold 26px Inter, sans-serif';
+                    ctx.font = 'bold 24px Inter, sans-serif';
                     ctx.textAlign = 'center';
-                    ctx.fillText('[ NO PHOTO ]', W / 2, photoY + photoH / 2 + 10);
+                    ctx.fillText('[ NO PHOTO ]', W / 2, photoY + photoH / 2 + 8);
                     ctx.textAlign = 'left';
                 }
+
+                // Sleek rounded photo frame border
+                ctx.strokeStyle = '#09090b';
+                ctx.lineWidth = 4;
+                ctx.beginPath();
+                ctx.roundRect(photoX, photoY, photoW, photoH, radius);
+                ctx.stroke();
+
             } else {
-                // When photo toggle is OFF, shift layout up for clean presentation
+                // When photo toggle is OFF, shift layout up cleanly
                 nameY = 280;
                 roleY = 325;
                 boxY = 400;
@@ -814,7 +858,7 @@
             // 6. Clean White Metadata Box
             const boxX = 40;
             const boxW = W - 80;
-            const boxH = 320;
+            const boxH = 310;
 
             ctx.fillStyle = '#ffffff';
             ctx.beginPath();
@@ -829,47 +873,47 @@
             // Row 1: Email Account
             ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('EMAIL ACCOUNT', boxX + 24, boxY + 48);
+            ctx.fillText('EMAIL ACCOUNT', boxX + 24, boxY + 46);
 
             ctx.fillStyle = '#09090b';
             ctx.font = 'bold 24px Inter, sans-serif';
-            ctx.fillText(currentIntern.email, boxX + 24, boxY + 88);
+            ctx.fillText(currentIntern.email, boxX + 24, boxY + 86);
 
             // Dashed Divider Line inside Meta Box
             ctx.strokeStyle = '#e4e4e7';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.setLineDash([6, 6]);
-            ctx.moveTo(boxX + 24, boxY + 125);
-            ctx.lineTo(boxX + boxW - 24, boxY + 125);
+            ctx.moveTo(boxX + 24, boxY + 120);
+            ctx.lineTo(boxX + boxW - 24, boxY + 120);
             ctx.stroke();
             ctx.setLineDash([]); // reset
 
             // Row 2: Issued By & Official Site
             ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('ISSUED BY', boxX + 24, boxY + 175);
+            ctx.fillText('ISSUED BY', boxX + 24, boxY + 170);
 
             ctx.fillStyle = '#09090b';
             ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText('Dominal Technology', boxX + 24, boxY + 210);
+            ctx.fillText('Dominal Technology', boxX + 24, boxY + 205);
 
             ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('OFFICIAL SITE', boxX + 360, boxY + 175);
+            ctx.fillText('OFFICIAL SITE', boxX + 360, boxY + 170);
 
             ctx.fillStyle = '#09090b';
             ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText('dominal.in', boxX + 360, boxY + 210);
+            ctx.fillText('dominal.in', boxX + 360, boxY + 205);
 
             // Row 3: Status
             ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('STATUS', boxX + 24, boxY + 262);
+            ctx.fillText('STATUS', boxX + 24, boxY + 256);
 
             ctx.fillStyle = '#16a34a';
             ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText('VERIFIED INTERN', boxX + 24, boxY + 292);
+            ctx.fillText('VERIFIED INTERN', boxX + 24, boxY + 286);
 
             // 7. Footer
             ctx.strokeStyle = '#e4e4e7';
