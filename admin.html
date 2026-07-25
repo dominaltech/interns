@@ -1003,7 +1003,9 @@
                 .map(i => i.value.trim())
                 .filter(v => v.length > 0);
 
-            const combinedTaskText = inputs.join('\n');
+            const combinedTaskText = inputs.length > 1 
+                ? inputs.map((t, idx) => `${idx + 1}. ${t.replace(/^\d+[\.\)]\s*/, '')}`).join('\n') 
+                : inputs.join('\n');
 
             try {
                 const { data, error } = await supabaseClient
