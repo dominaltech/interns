@@ -15,7 +15,8 @@
             --text-muted: #a1a1aa;
             --border-color: #e4e4e7;
             --border-hover: #18181b;
-            --accent-light: #f4f4f5;
+            --accent-light: #fafafa;
+            --success: #16a34a;
             --radius-lg: 14px;
             --radius-md: 8px;
             --radius-sm: 6px;
@@ -97,12 +98,12 @@
             color: var(--text-secondary);
         }
 
-        /* Form Controls Card */
+        /* Controls Card */
         .controls-card {
             background: #ffffff;
             border: 1px solid var(--border-color);
             border-radius: var(--radius-lg);
-            padding: 24px;
+            padding: 20px 24px;
             margin-bottom: 24px;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
@@ -111,7 +112,6 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 16px;
             user-select: none;
         }
 
@@ -207,10 +207,10 @@
             gap: 20px;
         }
 
-        /* The Digital ID Card Element */
+        /* Pure White Digital ID Card Display */
         .id-card-display {
             width: 360px;
-            height: 520px;
+            min-height: 540px;
             background: #ffffff;
             border: 2px solid var(--text-primary);
             border-radius: 16px;
@@ -220,7 +220,7 @@
             align-items: center;
             justify-content: space-between;
             position: relative;
-            box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+            box-shadow: 0 12px 32px rgba(0,0,0,0.06);
             overflow: hidden;
         }
 
@@ -229,8 +229,9 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            border-bottom: 1px solid var(--border-color);
+            border-bottom: 1.5px solid var(--border-color);
             padding-bottom: 14px;
+            background: #ffffff;
         }
 
         .id-brand {
@@ -240,10 +241,11 @@
         }
 
         .id-logo-img {
-            width: 36px;
-            height: 36px;
+            width: 38px;
+            height: 38px;
             object-fit: cover;
             border-radius: 6px;
+            border: 1px solid var(--border-color);
         }
 
         .id-brand-text {
@@ -269,9 +271,9 @@
             font-weight: 700;
             background-color: var(--text-primary);
             color: #ffffff;
-            padding: 4px 8px;
+            padding: 4px 10px;
             border-radius: 12px;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
             text-transform: uppercase;
         }
 
@@ -282,11 +284,11 @@
             border: 2px solid var(--text-primary);
             border-radius: 12px;
             overflow: hidden;
-            background-color: var(--accent-light);
+            background-color: #ffffff;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 12px 0;
+            margin: 16px 0 12px 0;
         }
 
         .id-photo-frame img {
@@ -313,7 +315,7 @@
             font-size: 20px;
             font-weight: 800;
             color: var(--text-primary);
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             letter-spacing: -0.02em;
         }
 
@@ -321,44 +323,78 @@
             font-size: 13px;
             font-weight: 600;
             color: var(--text-secondary);
-            margin-bottom: 12px;
+            margin-bottom: 14px;
         }
 
-        .id-meta-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 8px;
-            background-color: var(--accent-light);
-            padding: 10px 12px;
-            border-radius: 8px;
+        /* Clean White Metadata Box with Stacked Rows */
+        .id-meta-box {
+            width: 100%;
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px 14px;
             font-size: 11px;
             text-align: left;
-            border: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .id-meta-row {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .id-meta-row-split {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            border-top: 1px dashed var(--border-color);
+            padding-top: 6px;
         }
 
         .id-meta-label {
             color: var(--text-muted);
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             font-size: 9px;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.06em;
+            margin-bottom: 2px;
         }
 
         .id-meta-val {
             color: var(--text-primary);
             font-weight: 700;
             word-break: break-all;
+            font-size: 12px;
         }
 
         .id-footer {
             width: 100%;
             border-top: 1px solid var(--border-color);
-            padding-top: 10px;
+            padding-top: 12px;
+            margin-top: 14px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             font-size: 10px;
             color: var(--text-muted);
+            background: #ffffff;
+        }
+
+        /* Decorative Security Barcode */
+        .barcode-strip {
+            display: flex;
+            gap: 2px;
+            align-items: center;
+            height: 18px;
+            opacity: 0.7;
+        }
+
+        .barcode-bar {
+            background-color: var(--text-primary);
+            height: 100%;
         }
 
         /* Download Button */
@@ -382,7 +418,6 @@
             transform: translateY(-1px);
         }
 
-        /* Hidden Canvas for High-Res PNG Export */
         #exportCanvas {
             display: none;
         }
@@ -393,19 +428,19 @@
     <div class="container">
         <!-- Top Nav -->
         <div class="top-nav">
-            <a href="main.html" class="btn-back">
+            <a href="index.html" class="btn-back">
                 <svg viewBox="0 0 24 24">
                     <line x1="19" y1="12" x2="5" y2="12"></line>
                     <polyline points="12 19 5 12 12 5"></polyline>
                 </svg>
-                <span>Back to Profile</span>
+                <span>Back to Profile Portal</span>
             </a>
         </div>
 
         <!-- Header -->
         <header class="brand-header">
             <h1>Digital ID Card</h1>
-            <p class="subtitle">Your official Dominal Technology intern identification card.</p>
+            <p class="subtitle">Your official Dominal Technology intern identification credential.</p>
         </header>
 
         <!-- Controls Card -->
@@ -426,7 +461,15 @@
                         <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
                         <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
                     </svg>
-                    <span>Your image is not stored on Dominal servers — processed 100% locally in your browser.</span>
+                    <span>Your photo is processed 100% locally in browser — never uploaded to Dominal servers.</span>
+                </div>
+                <div class="privacy-notice" style="margin-top: 4px;">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="16" x2="12" y2="12"></line>
+                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
+                    </svg>
+                    <span>This feature is optional — use it only if you want an ID card with your photo.</span>
                 </div>
             </div>
         </div>
@@ -460,30 +503,48 @@
                     <div class="id-intern-name" id="cardInternName">Intern Name</div>
                     <div class="id-intern-role">Software Development Intern</div>
 
-                    <div class="id-meta-grid">
-                        <div>
-                            <div class="id-meta-label">Email Account</div>
-                            <div class="id-meta-val" id="cardInternEmail">user@gmail.com</div>
+                    <!-- Clean Pure-White Metadata Box -->
+                    <div class="id-meta-box">
+                        <div class="id-meta-row">
+                            <span class="id-meta-label">Email Account</span>
+                            <span class="id-meta-val" id="cardInternEmail">user@gmail.com</span>
                         </div>
-                        <div>
-                            <div class="id-meta-label">Issued By</div>
-                            <div class="id-meta-val">Dominal Technology</div>
-                        </div>
-                        <div>
-                            <div class="id-meta-label">Official Site</div>
-                            <div class="id-meta-val">dominal.in</div>
-                        </div>
-                        <div>
-                            <div class="id-meta-label">Status</div>
-                            <div class="id-meta-val" style="color:#16a34a;">VERIFIED</div>
+                        <div class="id-meta-row-split">
+                            <div>
+                                <span class="id-meta-label">Issued By</span>
+                                <div class="id-meta-val">Dominal Tech</div>
+                            </div>
+                            <div>
+                                <span class="id-meta-label">Official Site</span>
+                                <div class="id-meta-val">dominal.in</div>
+                            </div>
+                            <div>
+                                <span class="id-meta-label">Status</span>
+                                <div class="id-meta-val" style="color:#16a34a;">VERIFIED</div>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Footer -->
+                <!-- Footer with Barcode -->
                 <div class="id-footer">
-                    <span>DOMINAL TECHNOLOGY &copy; 2026</span>
-                    <span>dominal.in</span>
+                    <div>
+                        <div style="font-weight: 700; color: var(--text-primary);">DOMINAL TECHNOLOGY</div>
+                        <div style="font-size: 9px;">DEVELOPER ID • 2026</div>
+                    </div>
+
+                    <!-- SVG Barcode Pattern -->
+                    <div class="barcode-strip">
+                        <div class="barcode-bar" style="width: 2px;"></div>
+                        <div class="barcode-bar" style="width: 1px;"></div>
+                        <div class="barcode-bar" style="width: 3px;"></div>
+                        <div class="barcode-bar" style="width: 1px;"></div>
+                        <div class="barcode-bar" style="width: 2px;"></div>
+                        <div class="barcode-bar" style="width: 4px;"></div>
+                        <div class="barcode-bar" style="width: 1px;"></div>
+                        <div class="barcode-bar" style="width: 2px;"></div>
+                        <div class="barcode-bar" style="width: 3px;"></div>
+                    </div>
                 </div>
             </div>
 
@@ -499,8 +560,8 @@
         </div>
     </div>
 
-    <!-- Canvas for Image Generation -->
-    <canvas id="exportCanvas" width="720" height="1040"></canvas>
+    <!-- Hidden High-Res Export Canvas -->
+    <canvas id="exportCanvas" width="720" height="1080"></canvas>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
@@ -522,7 +583,7 @@
         document.getElementById('cardInternName').textContent = currentIntern.assigned_name;
         document.getElementById('cardInternEmail').textContent = currentIntern.email;
 
-        // Live fetch profile from Supabase
+        // Live profile fetch from Supabase
         async function fetchFreshProfile() {
             try {
                 if (!supabaseClient) return;
@@ -578,59 +639,60 @@
             reader.readAsDataURL(file);
         }
 
-        // Render high-res PNG download using Canvas API
+        // Render Pure White Crisp ID Card to Canvas
         async function downloadIDCard() {
             const canvas = document.getElementById('exportCanvas');
             const ctx = canvas.getContext('2d');
             const W = 720;
-            const H = 1040;
+            const H = 1080;
 
-            // Clear & White background
+            // 1. Pure Crisp White background
             ctx.fillStyle = '#ffffff';
             ctx.fillRect(0, 0, W, H);
 
-            // Outer border
+            // 2. Outer Dark Border
             ctx.strokeStyle = '#09090b';
             ctx.lineWidth = 8;
-            ctx.strokeRect(8, 8, W - 16, H - 16);
+            ctx.strokeRect(10, 10, W - 20, H - 20);
 
-            // Inner header bar
-            ctx.fillStyle = '#f4f4f5';
-            ctx.fillRect(16, 16, W - 32, 140);
+            // 3. Header Line
             ctx.strokeStyle = '#e4e4e7';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(16, 16, W - 32, 140);
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(30, 150);
+            ctx.lineTo(W - 30, 150);
+            ctx.stroke();
 
             // Load and draw Logo
             try {
                 const logoImg = new Image();
                 logoImg.src = 'dominalnew.jpeg';
                 await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; });
-                ctx.drawImage(logoImg, 40, 36, 100, 100);
+                ctx.drawImage(logoImg, 40, 35, 90, 90);
             } catch (e) {}
 
             // Brand Text
             ctx.fillStyle = '#09090b';
-            ctx.font = 'bold 32px Inter, sans-serif';
-            ctx.fillText('DOMINAL TECH', 160, 75);
+            ctx.font = 'bold 30px Inter, sans-serif';
+            ctx.fillText('DOMINAL TECH', 150, 75);
             ctx.fillStyle = '#71717a';
-            ctx.font = '500 24px Inter, sans-serif';
-            ctx.fillText('dominal.in', 160, 115);
+            ctx.font = '500 22px Inter, sans-serif';
+            ctx.fillText('dominal.in', 150, 110);
 
-            // Badge Pill
+            // Intern Badge Pill
             ctx.fillStyle = '#09090b';
             ctx.beginPath();
-            ctx.roundRect(W - 190, 55, 140, 50, 25);
+            ctx.roundRect(W - 180, 50, 140, 50, 25);
             ctx.fill();
             ctx.fillStyle = '#ffffff';
             ctx.font = 'bold 22px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText('INTERN', W - 120, 88);
+            ctx.fillText('INTERN', W - 110, 83);
             ctx.textAlign = 'left';
 
-            // Photo Frame
+            // 4. Photo Frame
             const photoX = W / 2 - 120;
-            const photoY = 200;
+            const photoY = 190;
             const photoW = 240;
             const photoH = 280;
 
@@ -646,71 +708,102 @@
                     ctx.drawImage(uPhoto, photoX, photoY, photoW, photoH);
                 } catch (e) {}
             } else {
-                ctx.fillStyle = '#f4f4f5';
+                ctx.fillStyle = '#ffffff';
                 ctx.fillRect(photoX, photoY, photoW, photoH);
                 ctx.fillStyle = '#a1a1aa';
-                ctx.font = 'bold 28px Inter, sans-serif';
+                ctx.font = 'bold 26px Inter, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('[ NO PHOTO ]', W / 2, photoY + photoH / 2 + 10);
                 ctx.textAlign = 'left';
             }
 
-            // Intern Name & Role
+            // 5. Intern Name & Role
             ctx.fillStyle = '#09090b';
-            ctx.font = 'bold 44px Inter, sans-serif';
+            ctx.font = 'bold 42px Inter, sans-serif';
             ctx.textAlign = 'center';
-            ctx.fillText(currentIntern.assigned_name, W / 2, 540);
+            ctx.fillText(currentIntern.assigned_name, W / 2, 530);
 
             ctx.fillStyle = '#71717a';
             ctx.font = '600 26px Inter, sans-serif';
-            ctx.fillText('Software Development Intern', W / 2, 590);
+            ctx.fillText('Software Development Intern', W / 2, 575);
 
-            // Metadata Grid Box
-            ctx.fillStyle = '#f4f4f5';
+            // 6. Clean White Metadata Box (Pure White background, crisp border)
+            const boxX = 40;
+            const boxY = 620;
+            const boxW = W - 80;
+            const boxH = 300;
+
+            ctx.fillStyle = '#ffffff';
             ctx.beginPath();
-            ctx.roundRect(60, 640, W - 120, 260, 16);
+            ctx.roundRect(boxX, boxY, boxW, boxH, 16);
             ctx.fill();
             ctx.strokeStyle = '#e4e4e7';
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.stroke();
 
             ctx.textAlign = 'left';
-            // Column 1
-            ctx.fillStyle = '#71717a';
+
+            // Row 1: Email Account (Full Width Row)
+            ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('EMAIL ACCOUNT:', 90, 690);
+            ctx.fillText('EMAIL ACCOUNT', boxX + 24, boxY + 45);
+
+            ctx.fillStyle = '#09090b';
+            ctx.font = 'bold 24px Inter, sans-serif';
+            ctx.fillText(currentIntern.email, boxX + 24, boxY + 80);
+
+            // Dashed Divider Line inside Meta Box
+            ctx.strokeStyle = '#e4e4e7';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.setLineDash([6, 6]);
+            ctx.moveTo(boxX + 24, boxY + 115);
+            ctx.lineTo(boxX + boxW - 24, boxY + 115);
+            ctx.stroke();
+            ctx.setLineDash([]); // reset
+
+            // Row 2: Issued By & Official Site
+            ctx.fillStyle = '#a1a1aa';
+            ctx.font = 'bold 18px Inter, sans-serif';
+            ctx.fillText('ISSUED BY', boxX + 24, boxY + 160);
+
             ctx.fillStyle = '#09090b';
             ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText(currentIntern.email, 90, 725);
+            ctx.fillText('Dominal Technology', boxX + 24, boxY + 195);
 
-            ctx.fillStyle = '#71717a';
+            ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('ISSUED BY:', 90, 780);
+            ctx.fillText('OFFICIAL SITE', boxX + 360, boxY + 160);
+
             ctx.fillStyle = '#09090b';
             ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText('Dominal Technology', 90, 815);
+            ctx.fillText('dominal.in', boxX + 360, boxY + 195);
 
-            // Column 2
-            ctx.fillStyle = '#71717a';
+            // Row 3: Status
+            ctx.fillStyle = '#a1a1aa';
             ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('OFFICIAL SITE:', 420, 690);
-            ctx.fillStyle = '#09090b';
-            ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText('dominal.in', 420, 725);
+            ctx.fillText('STATUS', boxX + 24, boxY + 245);
 
-            ctx.fillStyle = '#71717a';
-            ctx.font = 'bold 18px Inter, sans-serif';
-            ctx.fillText('STATUS:', 420, 780);
             ctx.fillStyle = '#16a34a';
             ctx.font = 'bold 22px Inter, sans-serif';
-            ctx.fillText('VERIFIED INTERN', 420, 815);
+            ctx.fillText('VERIFIED INTERN', boxX + 24, boxY + 275);
 
-            // Footer
-            ctx.fillStyle = '#a1a1aa';
-            ctx.font = '500 20px Inter, sans-serif';
-            ctx.fillText('DOMINAL TECHNOLOGY © 2026', 60, 970);
+            // 7. Footer
+            ctx.strokeStyle = '#e4e4e7';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(40, 965);
+            ctx.lineTo(W - 40, 965);
+            ctx.stroke();
+
+            ctx.fillStyle = '#09090b';
+            ctx.font = 'bold 20px Inter, sans-serif';
+            ctx.fillText('DOMINAL TECHNOLOGY © 2026', 40, 1015);
+
+            ctx.fillStyle = '#71717a';
+            ctx.font = '500 18px Inter, sans-serif';
             ctx.textAlign = 'right';
-            ctx.fillText('dominal.in', W - 60, 970);
+            ctx.fillText('dominal.in', W - 40, 1015);
 
             // Download Trigger
             const dataUrl = canvas.toDataURL('image/png');
