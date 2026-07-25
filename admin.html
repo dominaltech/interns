@@ -1129,11 +1129,27 @@
             }
 
             tbody.innerHTML = filtered.map(item => {
-                const urlText = item.project_url || '';
-                const isLink = /^https?:\/\//i.test(urlText.trim());
+                let urlText = (item.project_url || '').trim();
+
+                // Smart Fallback for past submissions made before project_url column was added
+                if (!urlText && item.task_response) {
+                    const rawResp = item.task_response;
+                    const urlMatch = rawResp.match(/(https?:\/\/[^\s]+)/i);
+                    const notesMatch = rawResp.match(/Notes \/ URL:\n([\s\S]*)/i);
+
+                    if (urlMatch) {
+                        urlText = urlMatch[1];
+                    } else if (notesMatch && notesMatch[1]) {
+                        urlText = notesMatch[1].trim();
+                    } else if (!rawResp.includes('Completed Items')) {
+                        urlText = rawResp.trim();
+                    }
+                }
+
+                const isLink = /^https?:\/\//i.test(urlText);
 
                 const urlDisplayHtml = isLink 
-                    ? `<a href="${escapeHtml(urlText.trim())}" target="_blank" class="btn-sm-edit" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px;">Open Project ↗</a><div style="font-size:11px; color:var(--text-muted); margin-top:4px; word-break:break-all;">${escapeHtml(urlText)}</div>`
+                    ? `<a href="${escapeHtml(urlText)}" target="_blank" class="btn-sm-edit" style="text-decoration:none; display:inline-flex; align-items:center; gap:4px;">Open Project ↗</a><div style="font-size:11px; color:var(--text-muted); margin-top:4px; word-break:break-all;">${escapeHtml(urlText)}</div>`
                     : `<div class="task-response-box">${escapeHtml(urlText || '—')}</div>`;
 
                 return `
