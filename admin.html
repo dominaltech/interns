@@ -1,0 +1,883 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dominal Technology — Admin Management Portal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #09090b;
+            --text-secondary: #71717a;
+            --text-muted: #a1a1aa;
+            --border-color: #e4e4e7;
+            --border-hover: #18181b;
+            --accent-light: #f4f4f5;
+            --error: #dc2626;
+            --error-bg: #fef2f2;
+            --success: #16a34a;
+            --success-bg: #f0fdf4;
+            --radius-lg: 12px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+        }
+
+        /* 1. Login Gate */
+        .login-wrapper {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 380px;
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 32px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+            text-align: center;
+        }
+
+        .login-icon {
+            width: 48px;
+            height: 48px;
+            background-color: var(--accent-light);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px auto;
+        }
+
+        .login-icon svg {
+            width: 24px;
+            height: 24px;
+            stroke: var(--text-primary);
+            fill: none;
+            stroke-width: 2;
+        }
+
+        .login-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .login-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        .input-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+            display: block;
+        }
+
+        input[type="text"], input[type="email"], input[type="password"], textarea {
+            width: 100%;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 10px 12px;
+            font-size: 14px;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        input[type="text"]:focus, input[type="email"]:focus, input[type="password"]:focus, textarea:focus {
+            border-color: var(--text-primary);
+            box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.08);
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 8px;
+        }
+
+        .btn-login:hover {
+            opacity: 0.9;
+        }
+
+        .alert-error {
+            display: none;
+            background-color: var(--error-bg);
+            color: var(--error);
+            border: 1px solid rgba(220, 38, 38, 0.2);
+            padding: 8px 12px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            margin-bottom: 16px;
+            text-align: left;
+        }
+
+        /* 2. Admin Dashboard Layout */
+        .dashboard-layout {
+            display: none;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px 80px 20px;
+        }
+
+        .dash-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+        }
+
+        .dash-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .dash-brand svg {
+            width: 28px;
+            height: 28px;
+        }
+
+        .dash-title {
+            font-size: 22px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .dash-sub {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-logout:hover {
+            color: var(--text-primary);
+            border-color: var(--text-primary);
+        }
+
+        /* Tab Navigation */
+        .tab-nav {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 28px;
+        }
+
+        .tab-btn {
+            padding: 10px 18px;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border: none;
+            background: none;
+            cursor: pointer;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            color: var(--text-primary);
+        }
+
+        .tab-btn.active {
+            color: var(--text-primary);
+            border-bottom-color: var(--text-primary);
+        }
+
+        /* Card Panels */
+        .panel-card {
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 28px;
+            background-color: #ffffff;
+            margin-bottom: 24px;
+        }
+
+        .panel-title {
+            font-size: 17px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+
+        .panel-subtitle {
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 20px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .btn-action {
+            background-color: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 11px 20px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-action:hover {
+            opacity: 0.9;
+        }
+
+        /* Table & Lists */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        th {
+            background-color: var(--accent-light);
+            color: var(--text-secondary);
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            padding: 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: top;
+        }
+
+        .badge-code {
+            background-color: var(--accent-light);
+            border: 1px solid var(--border-color);
+            padding: 2px 6px;
+            border-radius: var(--radius-sm);
+            font-family: monospace;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .btn-sm-danger {
+            background: transparent;
+            border: 1px solid rgba(220, 38, 38, 0.3);
+            color: var(--error);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .btn-sm-danger:hover {
+            background-color: var(--error-bg);
+            border-color: var(--error);
+        }
+
+        .btn-sm-edit {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: 4px 8px;
+            border-radius: var(--radius-sm);
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-right: 6px;
+        }
+
+        .btn-sm-edit:hover {
+            border-color: var(--text-primary);
+            background-color: var(--accent-light);
+        }
+
+        /* Stack Badges */
+        .stack-badge {
+            background-color: #ffffff;
+            border: 1px solid var(--border-color);
+            padding: 4px 8px;
+            border-radius: 16px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-right: 4px;
+            margin-bottom: 4px;
+        }
+
+        .stack-badge svg {
+            width: 10px;
+            height: 10px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.5;
+        }
+
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 16px;
+            height: 16px;
+            stroke: var(--text-muted);
+        }
+
+        .search-input {
+            padding-left: 36px !important;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. LOGIN GATE -->
+    <div class="login-wrapper" id="loginView">
+        <div class="login-card">
+            <div class="login-icon">
+                <svg viewBox="0 0 24 24">
+                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                    <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                </svg>
+            </div>
+            <h1 class="login-title">Admin Management</h1>
+            <p class="login-subtitle">Dominal Technology Portal</p>
+
+            <div class="alert-error" id="loginError">
+                Invalid username or password.
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Username</label>
+                <input type="text" id="loginUser" placeholder="admin" autocomplete="off">
+            </div>
+
+            <div class="form-group">
+                <label class="input-label">Password</label>
+                <input type="password" id="loginPass" placeholder="••••••••" autocomplete="off">
+            </div>
+
+            <button type="button" class="btn-login" onclick="attemptLogin()">Sign In</button>
+        </div>
+    </div>
+
+    <!-- 2. DASHBOARD VIEW -->
+    <div class="dashboard-layout" id="dashboardView">
+        <header class="dash-header">
+            <div class="dash-brand">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                </svg>
+                <div>
+                    <h1 class="dash-title">Admin Management Portal</h1>
+                    <p class="dash-sub">Manage Intern Accounts, Tasks & Submissions</p>
+                </div>
+            </div>
+            <button class="btn-logout" onclick="logout()">Sign Out</button>
+        </header>
+
+        <!-- Navigation Tabs -->
+        <div class="tab-nav">
+            <button class="tab-btn active" id="tabBtnInterns" onclick="switchTab('interns')">1. Manage Interns</button>
+            <button class="tab-btn" id="tabBtnSkills" onclick="switchTab('skills')">2. Skills Submissions</button>
+            <button class="tab-btn" id="tabBtnTasks" onclick="switchTab('tasks')">3. Task Submissions</button>
+        </div>
+
+        <!-- TAB 1: MANAGE INTERNS -->
+        <div id="tabContentInterns">
+            <div class="panel-card">
+                <div class="panel-title">Add New Intern Profile</div>
+                <div class="panel-subtitle">Create an account and assign a temporary task for the intern.</div>
+
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label class="input-label">Assigned Full Name</label>
+                        <input type="text" id="newInternName" placeholder="e.g. Rahul Sharma">
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Email Address (Login Username)</label>
+                        <input type="email" id="newInternEmail" placeholder="e.g. rahul@gmail.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Account Password</label>
+                        <input type="text" id="newInternPassword" placeholder="e.g. pass123">
+                    </div>
+                    <div class="form-group">
+                        <label class="input-label">Assigned Task Instructions</label>
+                        <input type="text" id="newInternTask" placeholder="e.g. Build a responsive landing page in HTML/CSS">
+                    </div>
+                </div>
+
+                <button type="button" class="btn-action" onclick="addIntern()">
+                    <span>Create Intern Account</span>
+                </button>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-title">Existing Intern Accounts</div>
+                <div class="panel-subtitle">Manage accounts, update assigned tasks, or remove profiles.</div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Password</th>
+                                <th>Assigned Task</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="internsTableBody">
+                            <tr><td colspan="5" style="text-align: center;">Loading intern profiles...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 2: SKILLS SUBMISSIONS -->
+        <div id="tabContentSkills" style="display: none;">
+            <div class="panel-card">
+                <div class="panel-title">Tech Skills Submissions</div>
+                <div class="panel-subtitle">All tech stack background profiles submitted by interns.</div>
+
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" id="skillsSearch" placeholder="Search by name, email, or message..." oninput="renderSkillsTable()">
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Intern</th>
+                                <th>Email</th>
+                                <th>Selected Stacks</th>
+                                <th>Additional Notes</th>
+                                <th>Submitted At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="skillsTableBody">
+                            <tr><td colspan="5" style="text-align: center;">Loading skills submissions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: TASK SUBMISSIONS -->
+        <div id="tabContentTasks" style="display: none;">
+            <div class="panel-card">
+                <div class="panel-title">Task Completion Submissions</div>
+                <div class="panel-subtitle">Submitted project links and task completion responses.</div>
+
+                <div class="search-box">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                    <input type="text" class="search-input" id="tasksSearch" placeholder="Search by name, email, or task response..." oninput="renderTasksTable()">
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Intern</th>
+                                <th>Email</th>
+                                <th>Task Title</th>
+                                <th>Submission Link / Notes</th>
+                                <th>Submitted At</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tasksTableBody">
+                            <tr><td colspan="5" style="text-align: center;">Loading task submissions...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'https://ucljwqqiusdruongdhvm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbGp3cXFpdXNkcnVvbmdkaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NjU2NzgsImV4cCI6MjA3ODQ0MTY3OH0.EgsMxTJ3UBXiL2jnToHvbhjBZtxngeVmtTTrsprKZMs';
+
+        let supabaseClient = null;
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        let cacheInterns = [];
+        let cacheSkills = [];
+        let cacheTasks = [];
+
+        // Check authentication
+        if (sessionStorage.getItem('adminAuthenticated') === 'true') {
+            showDashboard();
+        }
+
+        document.getElementById('loginPass').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') attemptLogin();
+        });
+
+        function attemptLogin() {
+            const user = document.getElementById('loginUser').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+
+            if (user === 'admin' && pass === 'admin123') {
+                sessionStorage.setItem('adminAuthenticated', 'true');
+                showDashboard();
+            } else {
+                document.getElementById('loginError').style.display = 'block';
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('adminAuthenticated');
+            document.getElementById('dashboardView').style.display = 'none';
+            document.getElementById('loginView').style.display = 'flex';
+        }
+
+        function showDashboard() {
+            document.getElementById('loginView').style.display = 'none';
+            document.getElementById('dashboardView').style.display = 'block';
+            loadAllData();
+        }
+
+        function switchTab(tabKey) {
+            ['interns', 'skills', 'tasks'].forEach(key => {
+                const btn = document.getElementById('tabBtn' + key.charAt(0).toUpperCase() + key.slice(1));
+                const content = document.getElementById('tabContent' + key.charAt(0).toUpperCase() + key.slice(1));
+                if (btn && content) {
+                    btn.classList.remove('active');
+                    content.style.display = 'none';
+                }
+            });
+
+            const activeBtn = document.getElementById('tabBtn' + tabKey.charAt(0).toUpperCase() + tabKey.slice(1));
+            const activeContent = document.getElementById('tabContent' + tabKey.charAt(0).toUpperCase() + tabKey.slice(1));
+            if (activeBtn && activeContent) {
+                activeBtn.classList.add('active');
+                activeContent.style.display = 'block';
+            }
+        }
+
+        async function loadAllData() {
+            fetchInterns();
+            fetchSkills();
+            fetchTasks();
+        }
+
+        // Fetch Intern Profiles
+        async function fetchInterns() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('intern_profiles')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                cacheInterns = data || [];
+                renderInternsTable();
+            } catch (err) {
+                console.error('Error fetching interns:', err);
+            }
+        }
+
+        function renderInternsTable() {
+            const tbody = document.getElementById('internsTableBody');
+            if (cacheInterns.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">No intern profiles created yet. Use the form above to add one!</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = cacheInterns.map(item => `
+                <tr>
+                    <td><strong>${escapeHtml(item.assigned_name)}</strong></td>
+                    <td>${escapeHtml(item.email)}</td>
+                    <td><span class="badge-code">${escapeHtml(item.password)}</span></td>
+                    <td style="max-width: 280px; font-size: 12px; color: var(--text-secondary);">${escapeHtml(item.assigned_task || 'No task assigned')}</td>
+                    <td>
+                        <button class="btn-sm-edit" onclick="editTaskPrompt('${escapeHtml(item.email)}', '${escapeHtml(item.assigned_task || '')}')">Edit Task</button>
+                        <button class="btn-sm-danger" onclick="deleteIntern('${escapeHtml(item.email)}')">Delete</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Add Intern Profile
+        async function addIntern() {
+            const name = document.getElementById('newInternName').value.trim();
+            const email = document.getElementById('newInternEmail').value.trim().toLowerCase();
+            const pass = document.getElementById('newInternPassword').value.trim();
+            const task = document.getElementById('newInternTask').value.trim() || 'Complete your tech stack profile in the Skills section.';
+
+            if (!name || !email || !pass) {
+                alert('Please enter Full Name, Email, and Password for the intern.');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('intern_profiles')
+                    .insert([{ email: email, password: pass, assigned_name: name, assigned_task: task }]);
+
+                if (error) throw error;
+
+                alert('Intern profile created successfully!');
+                document.getElementById('newInternName').value = '';
+                document.getElementById('newInternEmail').value = '';
+                document.getElementById('newInternPassword').value = '';
+                document.getElementById('newInternTask').value = '';
+
+                fetchInterns();
+            } catch (err) {
+                console.error('Error adding intern:', err);
+                alert('Failed to create profile: ' + (err.message || 'Email might already exist.'));
+            }
+        }
+
+        async function editTaskPrompt(email, currentTask) {
+            const updatedTask = prompt('Update assigned task instructions for ' + email + ':', currentTask);
+            if (updatedTask === null) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('intern_profiles')
+                    .update({ assigned_task: updatedTask.trim() })
+                    .eq('email', email);
+
+                if (error) throw error;
+
+                fetchInterns();
+            } catch (err) {
+                console.error('Error updating task:', err);
+                alert('Failed to update task.');
+            }
+        }
+
+        async function deleteIntern(email) {
+            if (!confirm('Are you sure you want to delete profile: ' + email + '?')) return;
+
+            try {
+                const { data, error } = await supabaseClient
+                    .from('intern_profiles')
+                    .delete()
+                    .eq('email', email);
+
+                if (error) throw error;
+                fetchInterns();
+            } catch (err) {
+                console.error('Error deleting intern:', err);
+                alert('Failed to delete intern.');
+            }
+        }
+
+        // Fetch Skills Submissions
+        async function fetchSkills() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('skills_submissions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                cacheSkills = data || [];
+                renderSkillsTable();
+            } catch (err) {
+                console.error('Error fetching skills:', err);
+            }
+        }
+
+        function renderSkillsTable() {
+            const query = (document.getElementById('skillsSearch')?.value || '').toLowerCase().trim();
+            const tbody = document.getElementById('skillsTableBody');
+
+            const filtered = cacheSkills.filter(i => {
+                return (i.intern_name || '').toLowerCase().includes(query) ||
+                       (i.intern_email || '').toLowerCase().includes(query) ||
+                       (i.custom_message || '').toLowerCase().includes(query);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">No skills submissions found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => {
+                const stacks = [];
+                if (item.websites) stacks.push('Websites');
+                if (item.apps) stacks.push('Apps (Flutter)');
+                if (item.ui_ux) stacks.push('UI/UX');
+                if (item.database) stacks.push('Database');
+                if (item.backend) stacks.push('Backend');
+                if (item.api_ai) stacks.push('API / AI');
+
+                const stackHtml = stacks.map(s => `<span class="stack-badge"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"></polyline></svg>${s}</span>`).join('');
+
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(item.intern_name)}</strong></td>
+                        <td>${escapeHtml(item.intern_email)}</td>
+                        <td>${stackHtml || '<span style="color:var(--text-muted);">None</span>'}</td>
+                        <td style="font-size:12px;">${escapeHtml(item.custom_message || '—')}</td>
+                        <td style="font-size:12px; color:var(--text-secondary);">${formatDate(new Date(item.created_at))}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Fetch Task Submissions
+        async function fetchTasks() {
+            try {
+                const { data, error } = await supabaseClient
+                    .from('task_submissions')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+                cacheTasks = data || [];
+                renderTasksTable();
+            } catch (err) {
+                console.error('Error fetching tasks:', err);
+            }
+        }
+
+        function renderTasksTable() {
+            const query = (document.getElementById('tasksSearch')?.value || '').toLowerCase().trim();
+            const tbody = document.getElementById('tasksTableBody');
+
+            const filtered = cacheTasks.filter(i => {
+                return (i.intern_name || '').toLowerCase().includes(query) ||
+                       (i.intern_email || '').toLowerCase().includes(query) ||
+                       (i.task_response || '').toLowerCase().includes(query);
+            });
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; color:var(--text-secondary);">No task completion submissions found.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map(item => `
+                <tr>
+                    <td><strong>${escapeHtml(item.intern_name)}</strong></td>
+                    <td>${escapeHtml(item.intern_email)}</td>
+                    <td style="font-size:12px; font-weight:600;">${escapeHtml(item.task_title)}</td>
+                    <td style="font-size:12px; word-break:break-all;">${escapeHtml(item.task_response)}</td>
+                    <td style="font-size:12px; color:var(--text-secondary);">${formatDate(new Date(item.created_at))}</td>
+                </tr>
+            `).join('');
+        }
+
+        function formatDate(date) {
+            if (isNaN(date.getTime())) return '';
+            return date.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        function escapeHtml(str) {
+            if (!str) return '';
+            return str
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+    </script>
+</body>
+</html>

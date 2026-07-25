@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital ID Card — Dominal Technology</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #ffffff;
+            --text-primary: #09090b;
+            --text-secondary: #71717a;
+            --text-muted: #a1a1aa;
+            --border-color: #e4e4e7;
+            --border-hover: #18181b;
+            --accent-light: #f4f4f5;
+            --radius-lg: 14px;
+            --radius-md: 8px;
+            --radius-sm: 6px;
+            --transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+            line-height: 1.5;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 540px;
+            margin: 0 auto;
+        }
+
+        /* Top Nav */
+        .top-nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+
+        .btn-back {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-back:hover {
+            color: var(--text-primary);
+        }
+
+        .btn-back svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2.5;
+        }
+
+        .brand-header {
+            margin-bottom: 28px;
+            text-align: left;
+        }
+
+        h1 {
+            font-size: 26px;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            margin-bottom: 6px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        /* Form Controls Card */
+        .controls-card {
+            background: #ffffff;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+        }
+
+        .toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 16px;
+            user-select: none;
+        }
+
+        .toggle-title {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #e4e4e7;
+            transition: 0.25s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: 0.25s;
+            border-radius: 50%;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+        }
+
+        input:checked + .slider {
+            background-color: var(--text-primary);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+        }
+
+        .file-upload-box {
+            display: none;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 14px;
+            padding-top: 14px;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .file-upload-label {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        input[type="file"] {
+            font-size: 13px;
+        }
+
+        .privacy-notice {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 6px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .privacy-notice svg {
+            width: 12px;
+            height: 12px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+        }
+
+        /* ID Card Preview Container */
+        .card-preview-wrapper {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+
+        /* The Digital ID Card Element */
+        .id-card-display {
+            width: 360px;
+            height: 520px;
+            background: #ffffff;
+            border: 2px solid var(--text-primary);
+            border-radius: 16px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 12px 32px rgba(0,0,0,0.08);
+            overflow: hidden;
+        }
+
+        .id-header {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
+        }
+
+        .id-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .id-logo-img {
+            width: 36px;
+            height: 36px;
+            object-fit: cover;
+            border-radius: 6px;
+        }
+
+        .id-brand-text {
+            text-align: left;
+        }
+
+        .id-brand-name {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: var(--text-primary);
+        }
+
+        .id-site-url {
+            font-size: 11px;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .id-badge-label {
+            font-size: 10px;
+            font-weight: 700;
+            background-color: var(--text-primary);
+            color: #ffffff;
+            padding: 4px 8px;
+            border-radius: 12px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        /* Photo Frame */
+        .id-photo-frame {
+            width: 120px;
+            height: 140px;
+            border: 2px solid var(--text-primary);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: var(--accent-light);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 12px 0;
+        }
+
+        .id-photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .id-avatar-fallback {
+            width: 56px;
+            height: 56px;
+            stroke: var(--text-muted);
+            fill: none;
+            stroke-width: 1.5;
+        }
+
+        /* Intern Details */
+        .id-details {
+            text-align: center;
+            width: 100%;
+        }
+
+        .id-intern-name {
+            font-size: 20px;
+            font-weight: 800;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            letter-spacing: -0.02em;
+        }
+
+        .id-intern-role {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+        }
+
+        .id-meta-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            background-color: var(--accent-light);
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 11px;
+            text-align: left;
+            border: 1px solid var(--border-color);
+        }
+
+        .id-meta-label {
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: 0.05em;
+        }
+
+        .id-meta-val {
+            color: var(--text-primary);
+            font-weight: 700;
+            word-break: break-all;
+        }
+
+        .id-footer {
+            width: 100%;
+            border-top: 1px solid var(--border-color);
+            padding-top: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 10px;
+            color: var(--text-muted);
+        }
+
+        /* Download Button */
+        .btn-download {
+            background-color: var(--text-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: var(--radius-md);
+            padding: 14px 28px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: var(--transition);
+        }
+
+        .btn-download:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        /* Hidden Canvas for High-Res PNG Export */
+        #exportCanvas {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Top Nav -->
+        <div class="top-nav">
+            <a href="main.html" class="btn-back">
+                <svg viewBox="0 0 24 24">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                <span>Back to Profile</span>
+            </a>
+        </div>
+
+        <!-- Header -->
+        <header class="brand-header">
+            <h1>Digital ID Card</h1>
+            <p class="subtitle">Your official Dominal Technology intern identification card.</p>
+        </header>
+
+        <!-- Controls Card -->
+        <div class="controls-card">
+            <div class="toggle-row">
+                <span class="toggle-title">Include Profile Photo on ID</span>
+                <label class="switch">
+                    <input type="checkbox" id="photoToggle" onchange="togglePhotoOption()">
+                    <span class="slider"></span>
+                </label>
+            </div>
+
+            <div class="file-upload-box" id="fileUploadBox">
+                <label class="file-upload-label">Upload Your Photo (JPG / PNG):</label>
+                <input type="file" id="photoFileInput" accept="image/*" onchange="handlePhotoUpload(event)">
+                <div class="privacy-notice">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                    </svg>
+                    <span>Your image is not stored on Dominal servers — processed 100% locally in your browser.</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ID Card Preview -->
+        <div class="card-preview-wrapper">
+            <div class="id-card-display" id="idCardElement">
+                <!-- Header -->
+                <div class="id-header">
+                    <div class="id-brand">
+                        <img src="dominalnew.jpeg" alt="Logo" class="id-logo-img" onerror="this.style.display='none'">
+                        <div class="id-brand-text">
+                            <div class="id-brand-name">Dominal Tech</div>
+                            <div class="id-site-url">dominal.in</div>
+                        </div>
+                    </div>
+                    <div class="id-badge-label">INTERN</div>
+                </div>
+
+                <!-- Photo Frame -->
+                <div class="id-photo-frame" id="photoFrame">
+                    <svg class="id-avatar-fallback" id="avatarFallback" viewBox="0 0 24 24">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                    <img id="internPhotoImg" style="display: none;" alt="Intern Photo">
+                </div>
+
+                <!-- Intern Details -->
+                <div class="id-details">
+                    <div class="id-intern-name" id="cardInternName">Intern Name</div>
+                    <div class="id-intern-role">Software Development Intern</div>
+
+                    <div class="id-meta-grid">
+                        <div>
+                            <div class="id-meta-label">Email Account</div>
+                            <div class="id-meta-val" id="cardInternEmail">user@gmail.com</div>
+                        </div>
+                        <div>
+                            <div class="id-meta-label">Issued By</div>
+                            <div class="id-meta-val">Dominal Technology</div>
+                        </div>
+                        <div>
+                            <div class="id-meta-label">Official Site</div>
+                            <div class="id-meta-val">dominal.in</div>
+                        </div>
+                        <div>
+                            <div class="id-meta-label">Status</div>
+                            <div class="id-meta-val" style="color:#16a34a;">VERIFIED</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Footer -->
+                <div class="id-footer">
+                    <span>DOMINAL TECHNOLOGY &copy; 2026</span>
+                    <span>dominal.in</span>
+                </div>
+            </div>
+
+            <!-- Download Button -->
+            <button class="btn-download" onclick="downloadIDCard()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="7 10 12 15 17 10"></polyline>
+                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                </svg>
+                <span>Download ID Card (PNG)</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Canvas for Image Generation -->
+    <canvas id="exportCanvas" width="720" height="1040"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const SUPABASE_URL = 'https://ucljwqqiusdruongdhvm.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVjbGp3cXFpdXNkcnVvbmdkaHZtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjI4NjU2NzgsImV4cCI6MjA3ODQ0MTY3OH0.EgsMxTJ3UBXiL2jnToHvbhjBZtxngeVmtTTrsprKZMs';
+
+        let supabaseClient = null;
+        if (window.supabase) {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        }
+
+        // Check authentication
+        const sessionRaw = sessionStorage.getItem('intern_session');
+        if (!sessionRaw) {
+            window.location.href = 'main.html';
+        }
+        const currentIntern = JSON.parse(sessionRaw);
+
+        document.getElementById('cardInternName').textContent = currentIntern.assigned_name;
+        document.getElementById('cardInternEmail').textContent = currentIntern.email;
+
+        // Live fetch profile from Supabase
+        async function fetchFreshProfile() {
+            try {
+                if (!supabaseClient) return;
+                const { data, error } = await supabaseClient
+                    .from('intern_profiles')
+                    .select('assigned_name')
+                    .eq('email', currentIntern.email)
+                    .single();
+
+                if (data && data.assigned_name) {
+                    currentIntern.assigned_name = data.assigned_name;
+                    document.getElementById('cardInternName').textContent = data.assigned_name;
+                }
+            } catch (err) {}
+        }
+        fetchFreshProfile();
+
+        let userPhotoDataUrl = null;
+
+        function togglePhotoOption() {
+            const isChecked = document.getElementById('photoToggle').checked;
+            const uploadBox = document.getElementById('fileUploadBox');
+            const fallback = document.getElementById('avatarFallback');
+            const photoImg = document.getElementById('internPhotoImg');
+
+            if (isChecked) {
+                uploadBox.style.display = 'flex';
+                if (userPhotoDataUrl) {
+                    fallback.style.display = 'none';
+                    photoImg.style.display = 'block';
+                }
+            } else {
+                uploadBox.style.display = 'none';
+                photoImg.style.display = 'none';
+                fallback.style.display = 'block';
+            }
+        }
+
+        function handlePhotoUpload(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                userPhotoDataUrl = e.target.result;
+                const photoImg = document.getElementById('internPhotoImg');
+                const fallback = document.getElementById('avatarFallback');
+                
+                photoImg.src = userPhotoDataUrl;
+                photoImg.style.display = 'block';
+                fallback.style.display = 'none';
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Render high-res PNG download using Canvas API
+        async function downloadIDCard() {
+            const canvas = document.getElementById('exportCanvas');
+            const ctx = canvas.getContext('2d');
+            const W = 720;
+            const H = 1040;
+
+            // Clear & White background
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, W, H);
+
+            // Outer border
+            ctx.strokeStyle = '#09090b';
+            ctx.lineWidth = 8;
+            ctx.strokeRect(8, 8, W - 16, H - 16);
+
+            // Inner header bar
+            ctx.fillStyle = '#f4f4f5';
+            ctx.fillRect(16, 16, W - 32, 140);
+            ctx.strokeStyle = '#e4e4e7';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(16, 16, W - 32, 140);
+
+            // Load and draw Logo
+            try {
+                const logoImg = new Image();
+                logoImg.src = 'dominalnew.jpeg';
+                await new Promise((res) => { logoImg.onload = res; logoImg.onerror = res; });
+                ctx.drawImage(logoImg, 40, 36, 100, 100);
+            } catch (e) {}
+
+            // Brand Text
+            ctx.fillStyle = '#09090b';
+            ctx.font = 'bold 32px Inter, sans-serif';
+            ctx.fillText('DOMINAL TECH', 160, 75);
+            ctx.fillStyle = '#71717a';
+            ctx.font = '500 24px Inter, sans-serif';
+            ctx.fillText('dominal.in', 160, 115);
+
+            // Badge Pill
+            ctx.fillStyle = '#09090b';
+            ctx.beginPath();
+            ctx.roundRect(W - 190, 55, 140, 50, 25);
+            ctx.fill();
+            ctx.fillStyle = '#ffffff';
+            ctx.font = 'bold 22px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('INTERN', W - 120, 88);
+            ctx.textAlign = 'left';
+
+            // Photo Frame
+            const photoX = W / 2 - 120;
+            const photoY = 200;
+            const photoW = 240;
+            const photoH = 280;
+
+            ctx.strokeStyle = '#09090b';
+            ctx.lineWidth = 4;
+            ctx.strokeRect(photoX, photoY, photoW, photoH);
+
+            if (userPhotoDataUrl && document.getElementById('photoToggle').checked) {
+                try {
+                    const uPhoto = new Image();
+                    uPhoto.src = userPhotoDataUrl;
+                    await new Promise((res) => { uPhoto.onload = res; });
+                    ctx.drawImage(uPhoto, photoX, photoY, photoW, photoH);
+                } catch (e) {}
+            } else {
+                ctx.fillStyle = '#f4f4f5';
+                ctx.fillRect(photoX, photoY, photoW, photoH);
+                ctx.fillStyle = '#a1a1aa';
+                ctx.font = 'bold 28px Inter, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('[ NO PHOTO ]', W / 2, photoY + photoH / 2 + 10);
+                ctx.textAlign = 'left';
+            }
+
+            // Intern Name & Role
+            ctx.fillStyle = '#09090b';
+            ctx.font = 'bold 44px Inter, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText(currentIntern.assigned_name, W / 2, 540);
+
+            ctx.fillStyle = '#71717a';
+            ctx.font = '600 26px Inter, sans-serif';
+            ctx.fillText('Software Development Intern', W / 2, 590);
+
+            // Metadata Grid Box
+            ctx.fillStyle = '#f4f4f5';
+            ctx.beginPath();
+            ctx.roundRect(60, 640, W - 120, 260, 16);
+            ctx.fill();
+            ctx.strokeStyle = '#e4e4e7';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            ctx.textAlign = 'left';
+            // Column 1
+            ctx.fillStyle = '#71717a';
+            ctx.font = 'bold 18px Inter, sans-serif';
+            ctx.fillText('EMAIL ACCOUNT:', 90, 690);
+            ctx.fillStyle = '#09090b';
+            ctx.font = 'bold 22px Inter, sans-serif';
+            ctx.fillText(currentIntern.email, 90, 725);
+
+            ctx.fillStyle = '#71717a';
+            ctx.font = 'bold 18px Inter, sans-serif';
+            ctx.fillText('ISSUED BY:', 90, 780);
+            ctx.fillStyle = '#09090b';
+            ctx.font = 'bold 22px Inter, sans-serif';
+            ctx.fillText('Dominal Technology', 90, 815);
+
+            // Column 2
+            ctx.fillStyle = '#71717a';
+            ctx.font = 'bold 18px Inter, sans-serif';
+            ctx.fillText('OFFICIAL SITE:', 420, 690);
+            ctx.fillStyle = '#09090b';
+            ctx.font = 'bold 22px Inter, sans-serif';
+            ctx.fillText('dominal.in', 420, 725);
+
+            ctx.fillStyle = '#71717a';
+            ctx.font = 'bold 18px Inter, sans-serif';
+            ctx.fillText('STATUS:', 420, 780);
+            ctx.fillStyle = '#16a34a';
+            ctx.font = 'bold 22px Inter, sans-serif';
+            ctx.fillText('VERIFIED INTERN', 420, 815);
+
+            // Footer
+            ctx.fillStyle = '#a1a1aa';
+            ctx.font = '500 20px Inter, sans-serif';
+            ctx.fillText('DOMINAL TECHNOLOGY © 2026', 60, 970);
+            ctx.textAlign = 'right';
+            ctx.fillText('dominal.in', W - 60, 970);
+
+            // Download Trigger
+            const dataUrl = canvas.toDataURL('image/png');
+            const a = document.createElement('a');
+            a.href = dataUrl;
+            a.download = `Dominal_ID_Card_${currentIntern.assigned_name.replace(/\s+/g, '_')}.png`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+        }
+    </script>
+</body>
+</html>
