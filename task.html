@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -286,6 +287,7 @@
         }
     </style>
 </head>
+
 <body>
 
     <div class="container">
@@ -314,12 +316,19 @@
             </div>
 
             <!-- Fixed Instruction: Step 1 -->
-            <div style="background-color: var(--accent-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; gap: 10px;">
+            <div
+                style="background-color: var(--accent-light); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 12px 14px; margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; font-size: 13px; gap: 10px;">
                 <div style="display: flex; align-items: center; gap: 8px;">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+                        <polyline points="2 17 12 22 22 17"></polyline>
+                        <polyline points="2 12 12 17 22 12"></polyline>
+                    </svg>
                     <span><strong>Task 1:</strong> Complete your tech stack profile in the Skills section.</span>
                 </div>
-                <a href="skills.html" style="color: var(--text-primary); font-weight: 700; text-decoration: underline; font-size: 12px; white-space: nowrap;">Open Skills &rarr;</a>
+                <a href="skills.html"
+                    style="color: var(--text-primary); font-weight: 700; text-decoration: underline; font-size: 12px; white-space: nowrap;">Open
+                    Skills &rarr;</a>
             </div>
 
             <!-- Task Checklist Display -->
@@ -328,7 +337,7 @@
                     <path d="M9 11l3 3L22 4"></path>
                     <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                 </svg>
-                Task 2: Your Assigned Task Items (Tick when completed)
+                Task 2: Your Assigned Task Items (Tick and submit when completed)
             </div>
 
             <div class="checklist-group" id="checklistContainer">
@@ -342,7 +351,8 @@
                 </svg>
                 Submit Your Project URL or Progress Notes
             </div>
-            <textarea id="taskResponseInput" placeholder="Paste your GitHub repository URL, hosted demo link, or summary notes here..."></textarea>
+            <textarea id="taskResponseInput"
+                placeholder="Paste your GitHub repository URL, hosted demo link, or summary notes here..."></textarea>
 
             <button type="button" class="btn-submit" id="btnSubmitTask" onclick="submitTask()">
                 <span>Submit Task Response</span>
@@ -357,7 +367,8 @@
                 </svg>
             </div>
             <h2 class="success-title">Task Response Submitted!</h2>
-            <p class="success-msg">Thank you, <strong id="successInternName"></strong>. Your completed task items and progress notes have been sent to the admin dashboard.</p>
+            <p class="success-msg">Thank you, <strong id="successInternName"></strong>. Your completed task items and
+                progress notes have been sent to the admin dashboard.</p>
             <a href="index.html" class="btn-secondary">Return to Profile Portal</a>
         </div>
     </div>
@@ -394,7 +405,7 @@
                 if (error) throw error;
 
                 const rawTaskText = (data && data.assigned_task) ? data.assigned_task : 'Complete your assigned project task.';
-                
+
                 // Split multi-line or comma/semicolon tasks into items
                 taskItemsList = rawTaskText
                     .split(/\n|;/)
@@ -478,4 +489,5 @@
         }
     </script>
 </body>
+
 </html>
